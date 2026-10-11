@@ -8,4 +8,6 @@ All notable changes to this project are documented here. The format follows
 
 ## [0.1.0]
 
-- First release.
+- First release: `is_hex`, `parse`, `normalize`, `to_hex` and `HexColorError`.
+- Support for `#rgb`, `#rgba`, `#rrggbb` and `#rrggbbaa`, with optional leading hash,
+  any case, shorthand expansion and alpha round-tripping.
