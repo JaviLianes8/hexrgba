@@ -17,9 +17,10 @@ def alpha_to_byte(alpha: float) -> int:
     """Convert a 0..1 alpha into an alpha byte from 0 to 255.
 
     The value is multiplied by 255 and rounded to the nearest integer, halves rounding
-    up, using the exact value of the float (no binary rounding drift). Both ``a / 255``
-    and the string from :func:`css_alpha` convert back to the byte ``a`` they came from,
-    for every ``a`` from 0 to 255.
+    up. A float is read as its shortest decimal form (``repr``), the number you typed, so
+    ``0.3`` gives 77 (76.5 rounded up) rather than 76 from the binary value just below
+    0.3. Both ``a / 255`` and the string from :func:`css_alpha` convert back to the byte
+    ``a`` they came from, for every ``a`` from 0 to 255.
 
     Raises ChannelError for booleans, non-numbers, NaN and values outside 0..1.
     """
@@ -27,7 +28,8 @@ def alpha_to_byte(alpha: float) -> int:
         raise ChannelError(f"alpha must be a number from 0 to 1, got {alpha!r}")
     if not 0 <= alpha <= 1:
         raise ChannelError(f"alpha must be from 0 to 1, got {alpha!r}")
-    return math.floor(Fraction(alpha) * 255 + Fraction(1, 2))
+    exact = Fraction(alpha) if isinstance(alpha, int) else Fraction(repr(float(alpha)))
+    return math.floor(exact * 255 + Fraction(1, 2))
 
 
 def css_alpha(byte: int) -> str:

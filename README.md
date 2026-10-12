@@ -13,18 +13,18 @@ pip install hexrgba
 ```python
 from hexrgba import is_hex, parse, normalize, to_hex
 
-is_hex("#f00")          # True
-is_hex("red")           # False
+is_hex("#f00")  # True
+is_hex("red")  # False
 
-parse("#f00")           # (255, 0, 0, 255)
-parse("#ff000080")      # (255, 0, 0, 128)
-parse("00ff00")         # (0, 255, 0, 255), the leading hash is optional
+parse("#f00")  # (255, 0, 0, 255)
+parse("#ff000080")  # (255, 0, 0, 128)
+parse("00ff00")  # (0, 255, 0, 255), the leading hash is optional
 
-normalize("#F00")       # "#ff0000"
+normalize("#F00")  # "#ff0000"
 normalize("#ff000080")  # "#ff000080"
 
-to_hex(255, 0, 128)     # "#ff0080"
-to_hex(255, 0, 128, 64) # "#ff008040"
+to_hex(255, 0, 128)  # "#ff0080"
+to_hex(255, 0, 128, 64)  # "#ff008040"
 ```
 
 The four CSS forms (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`) are all accepted, with or

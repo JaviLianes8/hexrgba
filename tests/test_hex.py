@@ -1,6 +1,6 @@
 import pytest
 
-from hexrgba import HexColorError, is_hex, normalize, parse, to_hex
+from hexrgba import ChannelError, HexColorError, is_hex, normalize, parse, shorten, to_hex
 
 
 @pytest.mark.parametrize(
@@ -98,3 +98,22 @@ def test_round_trip_parse_to_hex(channels: tuple[int, int, int, int]) -> None:
 
 def test_round_trip_without_alpha_is_opaque() -> None:
     assert parse(to_hex(10, 20, 30)) == (10, 20, 30, 255)
+
+
+def test_normalize_short_gives_the_lossless_short_form() -> None:
+    assert normalize("#AABBCC", short=True) == "#abc"
+    assert normalize("#aabbccdd", short=True) == "#abcd"
+    assert normalize("#aabbcd", short=True) == "#aabbcd"
+    assert normalize("#abcf", short=True) == "#abc"
+
+
+def test_shorten_keeps_long_forms_that_would_lose_data() -> None:
+    assert shorten("#112233") == "#123"
+    assert shorten("#11223344") == "#1234"
+    assert shorten("#11223345") == "#11223345"
+    assert shorten("FFF") == "#fff"
+
+
+def test_to_hex_channel_errors_are_channel_errors() -> None:
+    with pytest.raises(ChannelError):
+        to_hex(0, 0, 0, 300)
