@@ -4,7 +4,27 @@ import hexrgba
 
 # The public API. Add every exported name here as the library grows; this list is the
 # contract and the test below fails if the module and this list disagree.
-PUBLIC_API: list[str] = ["HexColorError", "is_hex", "normalize", "parse", "to_hex"]
+PUBLIC_API: list[str] = [
+    "NAMED_COLORS",
+    "ChannelError",
+    "Color",
+    "ColorError",
+    "ColorNameError",
+    "HexColorError",
+    "alpha_to_byte",
+    "blend",
+    "contrast_ratio",
+    "css_alpha",
+    "is_color",
+    "is_hex",
+    "normalize",
+    "parse",
+    "parse_color",
+    "passes_contrast",
+    "relative_luminance",
+    "shorten",
+    "to_hex",
+]
 
 
 def test_all_lists_exactly_the_public_api() -> None:

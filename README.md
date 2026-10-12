@@ -1,6 +1,7 @@
 # hexrgba
 
-Parse, validate and normalize CSS hex colors with full alpha and shorthand support.
+Parse, validate and normalize CSS hex colors and named colors, with exact alpha handling,
+CSS `rgb()` / `rgba()` output, WCAG contrast and alpha blending. Typed, zero dependencies.
 
 ## Install
 
@@ -11,35 +12,64 @@ pip install hexrgba
 ## Usage
 
 ```python
-from hexrgba import is_hex, parse, normalize, to_hex
+from hexrgba import Color, contrast_ratio, is_hex, normalize, parse, parse_color, to_hex
 
-is_hex("#f00")          # True
-is_hex("red")           # False
+is_hex("#f00")  # True
+parse("#ff000080")  # (255, 0, 0, 128)
+normalize("#F00")  # "#ff0000"
+normalize("#AABBCC", short=True)  # "#abc"
+to_hex(255, 0, 128, 64)  # "#ff008040"
 
-parse("#f00")           # (255, 0, 0, 255)
-parse("#ff000080")      # (255, 0, 0, 128)
-parse("00ff00")         # (0, 255, 0, 255), the leading hash is optional
+color = parse_color("RebeccaPurple")  # Color(r=102, g=51, b=153, a=255)
+color.hex  # "#663399"
+color.to_css()  # "rgb(102, 51, 153)"
+parse_color("#ff00ffed").to_css()  # "rgba(255, 0, 255, 0.93)"
+parse_color("#00ffff").name  # "aqua"
+Color.from_rgba(255, 0, 0, 0.5).hex  # "#ff000080"
 
-normalize("#F00")       # "#ff0000"
-normalize("#ff000080")  # "#ff000080"
-
-to_hex(255, 0, 128)     # "#ff0080"
-to_hex(255, 0, 128, 64) # "#ff008040"
+contrast_ratio("#767676", "white")  # 4.54...
 ```
 
-The four CSS forms (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`) are all accepted, with or
-without the leading hash and in any case. Shorthand expands by doubling each digit, so
-`#abc` parses the same as `#aabbcc`. `normalize` returns the canonical lowercase form:
-`#rrggbb` when the color is fully opaque, `#rrggbbaa` otherwise. Invalid input raises
-`HexColorError`.
+What it covers:
+
+- **All four hex forms** (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`) and **all 148 CSS named
+  colors** plus `transparent`, matched ASCII case-insensitively as CSS requires.
+- **Strict or lenient.** `strict=True` follows the CSS grammar (leading `#`, no surrounding
+  whitespace). The default also accepts a missing `#` and strips surrounding
+  Python whitespace (`str.strip()`).
+- **A frozen `Color`** with `hex`, `to_hex(short=True)`, `to_css()`, `name`, `alpha`,
+  `with_alpha()` and `from_rgba()`.
+- **Exact alpha.** `alpha_to_byte` and `css_alpha` follow CSS Color 4; every alpha byte
+  round-trips through its 0..1 float and through its CSS string.
+- **WCAG 2.x** `relative_luminance`, `contrast_ratio` and `passes_contrast` (AA / AAA).
+- **Blending** of a translucent color over a background with `blend`.
+- **Typed errors**, all `ValueError`: `ColorError`, `HexColorError`, `ColorNameError`,
+  `ChannelError`.
+
+The full guide, with the exact rules and the sources they come from, is in
+[GUIDE.md](GUIDE.md).
+
+## Command line
+
+```
+hexrgba normalize "#FFAA00"            # #ffaa00
+hexrgba normalize "#aabbcc" --short    # #abc
+hexrgba convert "#ff00ffed" --to css   # rgba(255, 0, 255, 0.93)
+hexrgba convert "#00ffff" --to name    # aqua
+hexrgba contrast "#767676" white       # 4.54:1
+hexrgba contrast "#777" white --level AA   # prints 4.47:1, exits 1
+hexrgba blend "#0000ff80" red          # #7f0080
+```
+
+Quote a leading `#`: most shells read it as the start of a comment. Errors go to stderr.
+Exit codes: 0 success, 1 the pair fails `--level`, 2 bad usage or an invalid color. `python -m hexrgba` works too.
 
 ## Why
 
-`webcolors` is built around the CSS named-color tables (turning `red` into a value and
-back), and most other color packages pull in a wider model of color spaces. There was no
-small, zero-dependency, typed helper that just does clean hex work: validating a string,
-reading it into `(r, g, b, a)` integers, and round-tripping back to a canonical hex string
-with correct alpha handling. That is all `hexrgba` does.
+`webcolors` is built around the CSS named-color tables, and most other color packages pull
+in a wider model of color spaces. `hexrgba` stays small and exact: the hex and keyword
+syntax of CSS, checked against the spec tables and the Web Platform Tests vectors, an
+alpha conversion that never drifts, and the WCAG contrast math, with no dependencies.
 
 ## License
 
