@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-13
+
+### Changed
+
+- The Web Platform Tests color parsing pages are no longer committed or shipped in the
+  sdist: `scripts/fetch_upstream.py` fetches them at a pinned commit, checked against
+  `tests/upstream/MANIFEST.json`, and hand-written cases keep the default suite meaningful
+  without them.
+
 ## [0.2.0] - Unreleased
 
 ### Added

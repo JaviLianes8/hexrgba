@@ -8,6 +8,9 @@ Thanks for taking the time. This project keeps a small, predictable shape.
 pip install -r requirements-dev.txt
 ```
 
+The Web Platform Tests vectors come from third-party pages that are not committed. Fetch
+them with `python scripts/fetch_upstream.py`; until then those tests skip.
+
 ## Before you open a pull request
 
 - Keep public API in `src/hexrgba/__init__.py`; internals live in `_`-prefixed modules.

@@ -11,7 +11,7 @@ from ._hex import is_hex, normalize, parse, shorten, to_hex
 from ._names import NAMED_COLORS
 from ._wcag import contrast_ratio, passes_contrast, relative_luminance
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 __all__ = [
     "NAMED_COLORS",

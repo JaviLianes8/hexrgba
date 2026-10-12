@@ -1,0 +1,47 @@
+{
+  "color-computed-hex-color.html": {
+    "title": "web-platform-tests css/css-color/parsing/color-computed-hex-color.html",
+    "url": "https://raw.githubusercontent.com/web-platform-tests/wpt/786385c76ca1c01d40eba0234dc59384e2eb73d4/css/css-color/parsing/color-computed-hex-color.html",
+    "revision": "commit 786385c76ca1c01d40eba0234dc59384e2eb73d4",
+    "fetched": "2026-10-13",
+    "size": 1276,
+    "sha256": "8d880c27a0991834e082277244259db9154fcc45969274149a12ab639cfc97cc",
+    "licence": "BSD-3-Clause (web-platform-tests contributors)"
+  },
+  "color-invalid-hex-color.html": {
+    "title": "web-platform-tests css/css-color/parsing/color-invalid-hex-color.html",
+    "url": "https://raw.githubusercontent.com/web-platform-tests/wpt/786385c76ca1c01d40eba0234dc59384e2eb73d4/css/css-color/parsing/color-invalid-hex-color.html",
+    "revision": "commit 786385c76ca1c01d40eba0234dc59384e2eb73d4",
+    "fetched": "2026-10-13",
+    "size": 1253,
+    "sha256": "21530ccc6e4348e028eb2c5109be33f1b1d86ac4a8281723bad0fb65773f3816",
+    "licence": "BSD-3-Clause (web-platform-tests contributors)"
+  },
+  "color-computed-named-color.html": {
+    "title": "web-platform-tests css/css-color/parsing/color-computed-named-color.html",
+    "url": "https://raw.githubusercontent.com/web-platform-tests/wpt/786385c76ca1c01d40eba0234dc59384e2eb73d4/css/css-color/parsing/color-computed-named-color.html",
+    "revision": "commit 786385c76ca1c01d40eba0234dc59384e2eb73d4",
+    "fetched": "2026-10-13",
+    "size": 34115,
+    "sha256": "ffbb15d445a6d1f3ec7b065aeea23b8cf6d5f0ecca62bc9c836bfd7365de87d5",
+    "licence": "BSD-3-Clause (web-platform-tests contributors)"
+  },
+  "color-invalid-named-color.html": {
+    "title": "web-platform-tests css/css-color/parsing/color-invalid-named-color.html",
+    "url": "https://raw.githubusercontent.com/web-platform-tests/wpt/786385c76ca1c01d40eba0234dc59384e2eb73d4/css/css-color/parsing/color-invalid-named-color.html",
+    "revision": "commit 786385c76ca1c01d40eba0234dc59384e2eb73d4",
+    "fetched": "2026-10-13",
+    "size": 10926,
+    "sha256": "ecb7cb213890cb73b785fbe6059749a321d417a2dca7786941f90b3f47d5dadc",
+    "licence": "BSD-3-Clause (web-platform-tests contributors)"
+  },
+  "color-valid.html": {
+    "title": "web-platform-tests css/css-color/parsing/color-valid.html",
+    "url": "https://raw.githubusercontent.com/web-platform-tests/wpt/786385c76ca1c01d40eba0234dc59384e2eb73d4/css/css-color/parsing/color-valid.html",
+    "revision": "commit 786385c76ca1c01d40eba0234dc59384e2eb73d4",
+    "fetched": "2026-10-13",
+    "size": 1569,
+    "sha256": "55f5c21fd5075067a120e3162fc68dee1e6ccc8d74c4d6b65d07479f27e7a003",
+    "licence": "BSD-3-Clause (web-platform-tests contributors)"
+  }
+}
