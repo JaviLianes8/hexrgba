@@ -3,8 +3,8 @@
 Progress:
 
 - [x] 1. Brainstorm written (this file)
-- [ ] 2. Implement the ranked items on `improve/hexrgba-round` (additive API, 0.2.0)
-- [ ] 3. Command-line interface (`hexrgba normalize | convert | contrast | blend`)
+- [x] 2. Implement the ranked items on `improve/hexrgba-round` (additive API, 0.2.0)
+- [x] 3. Command-line interface (`hexrgba normalize | convert | contrast | blend`)
 - [ ] 4. Gates green: `ruff format --check .`, `ruff check .`, `mypy --strict src`, `pytest`
 - [ ] 5. Contracts, spec and WPT vectors, WCAG examples, seeded fuzz, real wheel e2e
 - [ ] 6. Pull request opened
