@@ -6,7 +6,7 @@ ruff format --check .
 if ($LASTEXITCODE -ne 0) { exit 1 }
 ruff check .
 if ($LASTEXITCODE -ne 0) { exit 1 }
-mypy --strict src
+mypy --strict src tests
 if ($LASTEXITCODE -ne 0) { exit 1 }
 pytest
 if ($LASTEXITCODE -ne 0) { exit 1 }

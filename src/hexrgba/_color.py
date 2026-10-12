@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ._alpha import alpha_to_byte, css_alpha
-from ._errors import ColorNameError, HexColorError
+from ._errors import ColorNameError, HexColorError, shown
 from ._hex import check_channel, decode, is_hex_body, shorten, to_hex
 from ._names import NAMED_COLORS
 
@@ -116,7 +116,7 @@ def parse_color(text: str, *, strict: bool = False) -> Color:
     body = text.strip()
     if strict and body != text:
         error = HexColorError if body.startswith("#") else ColorNameError
-        raise error(f"surrounding whitespace is not allowed in strict mode: {text!r}")
+        raise error(f"surrounding whitespace is not allowed in strict mode: {shown(text)}")
     if body.startswith("#"):
         return Color(*decode(body[1:], text))
     key = body.translate(_ASCII_LOWER)
@@ -127,9 +127,9 @@ def parse_color(text: str, *, strict: bool = False) -> Color:
         return Color(*decode(value[1:], text))
     if is_hex_body(body):
         if strict:
-            raise HexColorError(f"hex color needs a leading '#' in strict mode: {text!r}")
+            raise HexColorError(f"hex color needs a leading '#' in strict mode: {shown(text)}")
         return Color(*decode(body, text))
-    raise ColorNameError(f"not a hex color or CSS named color: {text!r}")
+    raise ColorNameError(f"not a hex color or CSS named color: {shown(text)}")
 
 
 def is_color(text: str, *, strict: bool = False) -> bool:

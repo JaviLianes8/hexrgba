@@ -35,7 +35,8 @@ What it covers:
 - **All four hex forms** (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`) and **all 148 CSS named
   colors** plus `transparent`, matched ASCII case-insensitively as CSS requires.
 - **Strict or lenient.** `strict=True` follows the CSS grammar (leading `#`, no surrounding
-  whitespace). The default also accepts a missing `#` and surrounding whitespace.
+  whitespace). The default also accepts a missing `#` and strips surrounding
+  Python whitespace (`str.strip()`).
 - **A frozen `Color`** with `hex`, `to_hex(short=True)`, `to_css()`, `name`, `alpha`,
   `with_alpha()` and `from_rgba()`.
 - **Exact alpha.** `alpha_to_byte` and `css_alpha` follow CSS Color 4; every alpha byte
@@ -60,8 +61,8 @@ hexrgba contrast "#777" white --level AA   # prints 4.47:1, exits 1
 hexrgba blend "#0000ff80" red          # #7f0080
 ```
 
-Quote a leading `#`: most shells read it as the start of a comment. Errors go to stderr
-with exit code 1. `python -m hexrgba` works too.
+Quote a leading `#`: most shells read it as the start of a comment. Errors go to stderr.
+Exit codes: 0 success, 1 the pair fails `--level`, 2 bad usage or an invalid color. `python -m hexrgba` works too.
 
 ## Why
 

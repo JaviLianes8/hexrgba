@@ -12,7 +12,20 @@ class HexColorError(ColorError):
 
 
 class ChannelError(HexColorError):
-    """Raised when a channel or alpha value is outside its range or of the wrong type."""
+    """Raised when a channel or alpha value is outside its range or of the wrong type.
+
+    It subclasses HexColorError because 0.1.0 raised HexColorError for a bad channel in
+    ``to_hex``, and handlers written for that keep working.
+    """
+
+
+_SHOWN_LIMIT = 40
+
+
+def shown(value: object) -> str:
+    """Return ``repr(value)`` cut to a short prefix, so huge inputs keep messages small."""
+    text = repr(value)
+    return text if len(text) <= _SHOWN_LIMIT else text[:_SHOWN_LIMIT] + "..."
 
 
 class ColorNameError(ColorError):

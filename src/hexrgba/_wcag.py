@@ -37,7 +37,8 @@ def contrast_ratio(foreground: Color | str, background: Color | str) -> float:
     """Return the WCAG contrast ratio ``(L1 + 0.05) / (L2 + 0.05)``, from 1.0 to 21.0.
 
     L1 is the lighter luminance, so the order of two opaque colors does not matter. A
-    translucent foreground is first composited over the background with :func:`blend`.
+    translucent foreground is first composited over the background with :func:`blend`
+    and rounded to 8-bit channels, as a browser paints it.
     The background must be opaque, since what lies behind it is unknown: a translucent
     background raises ColorError.
     """
@@ -60,10 +61,10 @@ def passes_contrast(
     """Report whether the pair meets WCAG text contrast at ``level`` "AA" or "AAA".
 
     The minimum ratios are 4.5 (AA), 3 (AA, large text), 7 (AAA) and 4.5 (AAA, large
-    text). The ratio is not rounded first, so 4.499 fails 4.5. Raises ValueError for an
-    unknown level.
+    text). ``level`` is case-insensitive. The ratio is not rounded first, so 4.499 fails
+    4.5. Raises ValueError for an unknown level.
     """
     key = (level.upper() if isinstance(level, str) else level, large)
     if key not in _THRESHOLDS:
-        raise ValueError(f"level must be 'AA' or 'AAA', got {level!r}")
+        raise ValueError(f"level must be 'AA' or 'AAA', (any case), got {level!r}")
     return contrast_ratio(foreground, background) >= _THRESHOLDS[key]

@@ -6,7 +6,6 @@ import argparse
 import math
 import sys
 from collections.abc import Sequence
-from typing import NoReturn
 
 from . import __version__
 from ._blend import blend
@@ -14,7 +13,9 @@ from ._color import Color, parse_color
 from ._errors import ColorError
 from ._wcag import contrast_ratio, passes_contrast
 
-_EXAMPLES = """examples (quote a leading # so the shell does not read it as a comment):
+_EXAMPLES = """exit codes: 0 success, 1 the pair fails --level, 2 bad usage or invalid color
+
+examples (quote a leading # so the shell does not read it as a comment):
   hexrgba normalize "#FFAA00"            ->  #ffaa00
   hexrgba normalize ffaa0080             ->  #ffaa0080
   hexrgba normalize "#aabbcc" --short    ->  #abc
@@ -30,23 +31,20 @@ _EXAMPLES = """examples (quote a leading # so the shell does not read it as a co
 _FORMATS = ("hex", "short", "css", "channels", "name")
 
 
-class _Parser(argparse.ArgumentParser):
-    """Usage errors go to stderr with exit code 1, like every other failure."""
-
-    def error(self, message: str) -> NoReturn:
-        self.print_usage(sys.stderr)
-        self.exit(1, f"{self.prog}: error: {message}\n")
+# Exit codes: 0 success, 1 the pair fails --level, 2 bad usage or an invalid color.
+EXIT_FAILS_LEVEL = 1
+EXIT_BAD_INPUT = 2
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = _Parser(
+    parser = argparse.ArgumentParser(
         prog="hexrgba",
         description="Normalize, convert, compare and blend CSS hex and named colors.",
         epilog=_EXAMPLES,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--version", action="version", version=f"hexrgba {__version__}")
-    sub = parser.add_subparsers(dest="command", required=True, parser_class=_Parser)
+    sub = parser.add_subparsers(dest="command", required=True)
 
     norm = sub.add_parser("normalize", help="print the canonical lower-case hex form")
     norm.add_argument("color", help="hex color or CSS named color")
@@ -62,7 +60,9 @@ def _build_parser() -> argparse.ArgumentParser:
     con.add_argument("foreground", help="text color (may be translucent)")
     con.add_argument("background", help="opaque background color")
     con.add_argument("--level", choices=("AA", "AAA"), help="exit 1 if the pair fails it")
-    con.add_argument("--large", action="store_true", help="use the large-text threshold")
+    con.add_argument(
+        "--large", action="store_true", help="with --level, use the large-text threshold"
+    )
 
     ble = sub.add_parser("blend", help="composite a color over a background")
     ble.add_argument("foreground", help="color on top (usually translucent)")
@@ -106,7 +106,7 @@ def _run(args: argparse.Namespace) -> int:
         ):
             kind = "large text" if args.large else "normal text"
             print(f"hexrgba: fails WCAG {args.level} for {kind}", file=sys.stderr)
-            return 1
+            return EXIT_FAILS_LEVEL
     else:
         print(blend(args.foreground, args.background).hex)
     return 0
@@ -114,9 +114,12 @@ def _run(args: argparse.Namespace) -> int:
 
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the command-line interface and return a process exit code."""
-    args = _build_parser().parse_args(argv)
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+    if args.command == "contrast" and args.large and not args.level:
+        parser.error("--large only applies together with --level")
     try:
         return _run(args)
     except (ColorError, TypeError) as exc:
         print(f"hexrgba: error: {exc}", file=sys.stderr)
-        return 1
+        return EXIT_BAD_INPUT

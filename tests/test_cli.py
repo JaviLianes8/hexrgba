@@ -78,19 +78,32 @@ def test_ratio_is_truncated_not_rounded(capsys: pytest.CaptureFixture[str]) -> N
         (["blend", "#ggg", "red"], "not a valid hex color"),
     ],
 )
-def test_errors_go_to_stderr_with_exit_1(
+def test_errors_go_to_stderr_with_exit_2(
     capsys: pytest.CaptureFixture[str], args: list[str], message: str
 ) -> None:
     code, out, err = _run(capsys, *args)
-    assert (code, out) == (1, "")
+    assert (code, out) == (2, "")
     assert err.startswith("hexrgba: error:") and message in err
 
 
-def test_usage_errors_also_exit_1(capsys: pytest.CaptureFixture[str]) -> None:
+def test_usage_errors_exit_2(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as exc:
         main(["convert", "red", "--to", "lab"])
-    assert exc.value.code == 1
+    assert exc.value.code == 2
     assert "invalid choice" in capsys.readouterr().err
+
+
+def test_large_without_level_is_a_usage_error(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as exc:
+        main(["contrast", "#777", "white", "--large"])
+    assert exc.value.code == 2
+    assert "--large only applies together with --level" in capsys.readouterr().err
+
+
+def test_a_huge_input_gives_a_short_message(capsys: pytest.CaptureFixture[str]) -> None:
+    code, _, err = _run(capsys, "normalize", "z" * 1_000_000)
+    assert code == 2
+    assert len(err) < 200 and "..." in err
 
 
 def test_help_shows_runnable_examples(capsys: pytest.CaptureFixture[str]) -> None:

@@ -27,7 +27,7 @@ tests it, and so does `hexrgba`.
 | Mode | Leading `#` | Surrounding whitespace | Upper case |
 | --- | --- | --- | --- |
 | `strict=True` | required for hex | rejected | accepted (CSS is case-insensitive) |
-| lenient (default) | optional | stripped | accepted |
+| lenient (default) | optional | stripped with `str.strip()` (any Python whitespace) | accepted |
 
 No keyword is made only of hex digits, so lenient mode can never confuse a name with a
 hash-less hex color; a test pins that.
@@ -87,7 +87,8 @@ channels, using the `0.04045` threshold of the current WCAG definition (older te
 ignored.
 
 `contrast_ratio(fg, bg)` is `(L1 + 0.05) / (L2 + 0.05)` with `L1` the lighter, from 1 to 21.
-A translucent foreground is first blended over the background. The background must be
+A translucent foreground is first blended over the background and rounded to 8-bit
+channels, as a browser paints it; the ratio is measured on that painted color. The background must be
 opaque, because what lies behind it is unknown.
 
 `passes_contrast(fg, bg, level="AA", large=False)` compares without rounding, as WCAG
@@ -124,7 +125,9 @@ All errors are `ValueError` subclasses, so `0.1.0` handlers keep working:
   wrong type, including booleans.
 - `ColorNameError`: neither hex nor a known keyword.
 
-`parse_color` raises `TypeError` for a non-string. `is_color` and `is_hex` never raise.
+`parse_color` raises `TypeError` for a non-string. `is_color` never raises.
+`is_hex` and `parse` keep their 0.1.0 behaviour and raise `AttributeError` for a non-string.
+Error messages show at most the first 40 characters of the offending value.
 
 ## Command line
 
@@ -136,6 +139,7 @@ hexrgba blend FOREGROUND BACKGROUND
 ```
 
 `contrast` prints the ratio truncated to two decimals (a failing 4.499 never shows as
-4.50); with `--level` it exits 1 when the pair fails. Every failure, including usage
-errors, prints to stderr and exits 1. Every example in `hexrgba --help` is executed by the
+4.50); with `--level` it exits 1 when the pair fails. `--large` is only valid with `--level`.
+Bad usage and invalid colors print to stderr and exit 2, so a script can tell a failing
+pair from bad input. Every example in `hexrgba --help` is executed by the
 test suite and by the wheel end-to-end check.

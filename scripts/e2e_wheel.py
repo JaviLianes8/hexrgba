@@ -82,7 +82,7 @@ def main() -> int:
             check(f"example {' '.join(argv)}", (code, got.strip()) == (want_code, want_out), got)
 
         code, out, err = run([tool, "normalize", "nope"], cwd=work, env=env)
-        check("bad input exits 1 on stderr", (code, out) == (1, "") and "error" in err, err)
+        check("bad input exits 2 on stderr", (code, out) == (2, "") and "error" in err, err)
         code, out, _ = run([python, "-m", "hexrgba", "normalize", "BLACK"], cwd=work, env=env)
         check("python -m hexrgba", (code, out.strip()) == (0, "#000000"), out)
         probe = "import hexrgba; print(hexrgba.Color.parse('rebeccapurple').to_css())"

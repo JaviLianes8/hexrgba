@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ._errors import ChannelError, HexColorError
+from ._errors import ChannelError, HexColorError, shown
 
 _VALID_LENGTHS = frozenset({3, 4, 6, 8})
 _HEX_DIGITS = frozenset("0123456789abcdefABCDEF")
@@ -21,7 +21,7 @@ def is_hex_body(body: str) -> bool:
 def decode(body: str, original: str) -> tuple[int, int, int, int]:
     """Decode a hash-less hex body into channels, naming original in the error."""
     if not is_hex_body(body):
-        raise HexColorError(f"not a valid hex color: {original!r}")
+        raise HexColorError(f"not a valid hex color: {shown(original)}")
     if len(body) in (3, 4):
         body = "".join(ch * 2 for ch in body)
     r = int(body[0:2], 16)
@@ -48,7 +48,7 @@ def parse(value: str) -> tuple[int, int, int, int]:
 def check_channel(value: int, name: str) -> int:
     """Return value if it is an int from 0 to 255, else raise ChannelError."""
     if not isinstance(value, int) or isinstance(value, bool):
-        raise ChannelError(f"{name} must be an int from 0 to 255, got {value!r}")
+        raise ChannelError(f"{name} must be an int from 0 to 255, got {shown(value)}")
     if not 0 <= value <= 255:
         raise ChannelError(f"{name} must be from 0 to 255, got {value}")
     return value

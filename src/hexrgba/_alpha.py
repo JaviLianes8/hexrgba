@@ -9,7 +9,7 @@ from __future__ import annotations
 import math
 from fractions import Fraction
 
-from ._errors import ChannelError
+from ._errors import ChannelError, shown
 from ._hex import check_channel
 
 
@@ -25,9 +25,9 @@ def alpha_to_byte(alpha: float) -> int:
     Raises ChannelError for booleans, non-numbers, NaN and values outside 0..1.
     """
     if isinstance(alpha, bool) or not isinstance(alpha, (int, float)):
-        raise ChannelError(f"alpha must be a number from 0 to 1, got {alpha!r}")
+        raise ChannelError(f"alpha must be a number from 0 to 1, got {shown(alpha)}")
     if not 0 <= alpha <= 1:
-        raise ChannelError(f"alpha must be from 0 to 1, got {alpha!r}")
+        raise ChannelError(f"alpha must be from 0 to 1, got {shown(alpha)}")
     exact = Fraction(alpha) if isinstance(alpha, int) else Fraction(repr(float(alpha)))
     return math.floor(exact * 255 + Fraction(1, 2))
 

@@ -1,13 +1,16 @@
 """Seeded round-trip fuzz over the whole promise: every form parses back to itself."""
 
 import random
+import re
 
 from hexrgba import (
+    NAMED_COLORS,
     Color,
     alpha_to_byte,
     blend,
     contrast_ratio,
     css_alpha,
+    is_color,
     is_hex,
     normalize,
     parse,
@@ -72,3 +75,33 @@ def test_contrast_stays_in_range_and_blend_stays_opaque() -> None:
         backdrop = bg.with_alpha(1)
         assert 1.0 <= contrast_ratio(fg, backdrop) <= 21.0 + 1e-9
         assert blend(fg, backdrop).is_opaque
+
+
+_STRICT_HEX = re.compile(r"#(?:[0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})\Z")
+_ALPHABET = "#0123456789abcdefABCDEFgGxXkK \t\n\u00a0\u212a\u0131-_.,()"
+_KEYWORDS = [*NAMED_COLORS, "transparent"]
+
+
+def _oracle(text: str) -> bool:
+    folded = "".join(chr(ord(ch) + 32) if "A" <= ch <= "Z" else ch for ch in text)
+    return bool(_STRICT_HEX.match(text)) or folded in _KEYWORDS
+
+
+def _noise(rng: random.Random) -> str:
+    if rng.random() < 0.4:
+        base = list(rng.choice(_KEYWORDS))
+        for _ in range(rng.randrange(3)):
+            base.insert(rng.randrange(len(base) + 1), rng.choice(_ALPHABET))
+        return "".join(base)
+    return "".join(rng.choice(_ALPHABET) for _ in range(rng.randrange(10)))
+
+
+def test_seeded_negative_fuzz_matches_the_css_grammar_oracle() -> None:
+    rng = random.Random(_SEED + 1)
+    samples = [_noise(rng) for _ in range(_ROUNDS * 3)]
+    accepted = 0
+    for text in samples:
+        expected = _oracle(text)
+        assert is_color(text, strict=True) is expected, repr(text)
+        accepted += expected
+    assert 0 < accepted < len(samples)
