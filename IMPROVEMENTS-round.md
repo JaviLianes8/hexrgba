@@ -7,7 +7,7 @@ Progress:
 - [x] 3. Command-line interface (`hexrgba normalize | convert | contrast | blend`)
 - [x] 4. Gates green: `ruff format --check .`, `ruff check .`, `mypy --strict src`, `pytest`
 - [x] 5. Contracts, spec and WPT vectors, WCAG examples, seeded fuzz, real wheel e2e
-- [ ] 6. Pull request opened
+- [x] 6. Pull request opened (#2)
 - [ ] 7. Independent review findings fixed, gates re-run, pushed
 
 Ranked, substantial improvements for `hexrgba`, measured against the `0.1.0` surface:
