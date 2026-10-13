@@ -17,7 +17,8 @@ code written against `0.1.0` keeps its exact behaviour.
 ## Ground truth used in this round
 
 Every vector that claims an external origin is copied from the source as fetched on
-2026-10-12, and the file that holds it names the URL.
+2026-10-12, and the file that holds it names the URL. Third-party test pages are not
+committed: `tests/upstream/MANIFEST.json` pins them and `scripts/fetch_upstream.py` fetches them.
 
 - CSS Color Module Level 4, W3C Candidate Recommendation Draft of 9 October 2026,
   <https://www.w3.org/TR/css-color-4/>: section 5.2 (hex notation), section 6.1 (the

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hexrgba"
-version = "0.2.0"
+version = "0.2.1"
 description = "CSS hex and named colors: parse, normalize, exact alpha, rgba(), WCAG contrast and blending"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -35,6 +35,22 @@ Issues = "https://github.com/JaviLianes8/hexrgba/issues"
 Changelog = "https://github.com/JaviLianes8/hexrgba/blob/main/CHANGELOG.md"
 LinkedIn = "https://www.linkedin.com/in/jlianes/"
 Funding = "https://buymeacoffee.com/jlianesglrs"
+
+[tool.hatch.build.targets.sdist]
+# Third-party test files are fetched locally and never shipped; only their manifest is.
+include = [
+    "src/hexrgba",
+    "tests/*.py",
+    "tests/fixtures/css-color-4-named-colors.json",
+    "tests/upstream/MANIFEST.json",
+    "scripts/fetch_upstream.py",
+    "scripts/e2e_wheel.py",
+    "CHANGELOG.md",
+    "GUIDE.md",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/hexrgba"]
