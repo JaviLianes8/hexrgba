@@ -43,5 +43,59 @@
     "size": 1569,
     "sha256": "55f5c21fd5075067a120e3162fc68dee1e6ccc8d74c4d6b65d07479f27e7a003",
     "licence": "BSD-3-Clause (web-platform-tests contributors)"
+  },
+  "css-color-4-20261022.html": {
+    "title": "CSS Color Module Level 4, W3C Candidate Recommendation Draft, 22 October 2026",
+    "url": "https://www.w3.org/TR/2026/CRD-css-color-4-20261022/",
+    "revision": "dated W3C snapshot CRD-css-color-4-20261022",
+    "fetched": "2026-10-23",
+    "size": 1049411,
+    "sha256": "c53b1b0e3b15a25c752fa3d70f84c3f4feebca4d1e5508217c2fef1ab7aa1763",
+    "licence": "W3C Document License"
+  },
+  "wcag22-20241212.html": {
+    "title": "Web Content Accessibility Guidelines (WCAG) 2.2, W3C Recommendation, 12 December 2024",
+    "url": "https://www.w3.org/TR/2024/REC-WCAG22-20241212/",
+    "revision": "dated W3C snapshot REC-WCAG22-20241212",
+    "fetched": "2026-10-23",
+    "size": 512457,
+    "sha256": "6e3c5fe397257cae509a2fb4752b73062cf8cbeb92c2cec618989b17e4cf7057",
+    "licence": "W3C Document License"
+  },
+  "compositing-1-20240321.html": {
+    "title": "Compositing and Blending Level 1, W3C Candidate Recommendation Draft, 21 March 2024",
+    "url": "https://www.w3.org/TR/2024/CRD-compositing-1-20240321/",
+    "revision": "dated W3C snapshot CRD-compositing-1-20240321",
+    "fetched": "2026-10-23",
+    "size": 234781,
+    "sha256": "0fb91119308e706a5e4df368a91fa3b43cd5fe8cd8f192418b2df0a30ba8a62b",
+    "licence": "W3C Document License"
+  },
+  "wcag-understanding-non-text-contrast.html": {
+    "title": "w3c/wcag understanding/21/non-text-contrast.html (Understanding SC 1.4.11 Non-text Contrast)",
+    "url": "https://raw.githubusercontent.com/w3c/wcag/457cece22d8219be32d29c5c1313e71aa6b61eae/understanding/21/non-text-contrast.html",
+    "revision": "commit 457cece22d8219be32d29c5c1313e71aa6b61eae",
+    "fetched": "2026-10-23",
+    "size": 53042,
+    "sha256": "e074ad25c57f562bc4043c57d69f76dd410fabb6cce76cfc89c91ef5b7d55d62",
+    "licence": "W3C Software and Document License"
+  },
+  "wcag-technique-G183.html": {
+    "title": "w3c/wcag techniques/general/G183.html (Technique G183)",
+    "url": "https://raw.githubusercontent.com/w3c/wcag/457cece22d8219be32d29c5c1313e71aa6b61eae/techniques/general/G183.html",
+    "revision": "commit 457cece22d8219be32d29c5c1313e71aa6b61eae",
+    "fetched": "2026-10-23",
+    "size": 4960,
+    "sha256": "166e5df887aa3e9a2ec425687e986ddb0a1c6e1f18a1f6df84f037fac163e57f",
+    "licence": "W3C Software and Document License"
+  },
+  "wcag-technique-G207.html": {
+    "title": "w3c/wcag techniques/general/G207.html (Technique G207)",
+    "url": "https://raw.githubusercontent.com/w3c/wcag/457cece22d8219be32d29c5c1313e71aa6b61eae/techniques/general/G207.html",
+    "revision": "commit 457cece22d8219be32d29c5c1313e71aa6b61eae",
+    "fetched": "2026-10-23",
+    "size": 5926,
+    "sha256": "4fe04c187557613a6afc53cf97967da546f6f3c6eee1b30de8363b16f5121033",
+    "licence": "W3C Software and Document License"
   }
 }
