@@ -3,9 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import math
+import os
+import re
 import sys
 from collections.abc import Sequence
+from typing import NoReturn
 
 from . import __version__
 from ._blend import blend
@@ -31,13 +35,23 @@ examples (quote a leading # so the shell does not read it as a comment):
 _FORMATS = ("hex", "short", "css", "channels", "name")
 
 
-# Exit codes: 0 success, 1 the pair fails --level, 2 bad usage or an invalid color.
+# Exit codes: 0 success, 1 the pair fails --level (or the output closed early), 2 bad usage
+# or an invalid color.
 EXIT_FAILS_LEVEL = 1
 EXIT_BAD_INPUT = 2
+EXIT_OUTPUT_CLOSED = 1
+
+
+class _Parser(argparse.ArgumentParser):
+    """An argument parser whose usage errors quote at most 40 characters of any word."""
+
+    def error(self, message: str) -> NoReturn:
+        message = re.sub(r"\S{41,}", lambda word: word.group()[:40] + "...", message)
+        super().error(message[:500])
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _Parser(
         prog="hexrgba",
         description="Normalize, convert, compare and blend CSS hex and named colors.",
         epilog=_EXAMPLES,
@@ -119,7 +133,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.command == "contrast" and args.large and not args.level:
         parser.error("--large only applies together with --level")
     try:
-        return _run(args)
+        code = _run(args)
+        sys.stdout.flush()
     except (ColorError, TypeError) as exc:
         print(f"hexrgba: error: {exc}", file=sys.stderr)
         return EXIT_BAD_INPUT
+    except OSError:
+        # Only printing can fail here: the reader went away (a closed pipe, which Windows
+        # reports as EINVAL). Exit 1 quietly instead of a traceback at the final flush.
+        _silence_stdout()
+        return EXIT_OUTPUT_CLOSED
+    return code
+
+
+def _silence_stdout() -> None:
+    with contextlib.suppress(OSError, ValueError):
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())

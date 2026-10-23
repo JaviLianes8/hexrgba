@@ -22,13 +22,21 @@ def alpha_to_byte(alpha: float) -> int:
     0.3. Both ``a / 255`` and the string from :func:`css_alpha` convert back to the byte
     ``a`` they came from, for every ``a`` from 0 to 255.
 
-    Raises ChannelError for booleans, non-numbers, NaN and values outside 0..1.
+    Raises ChannelError for anything but an int or float from 0 to 1 (booleans and NaN
+    included).
+
+    >>> alpha_to_byte(0.5), alpha_to_byte(0.3), alpha_to_byte(1)
+    (128, 77, 255)
+    >>> alpha_to_byte(128 / 255)
+    128
     """
     if isinstance(alpha, bool) or not isinstance(alpha, (int, float)):
-        raise ChannelError(f"alpha must be a number from 0 to 1, got {shown(alpha)}")
-    if not 0 <= alpha <= 1:
-        raise ChannelError(f"alpha must be from 0 to 1, got {shown(alpha)}")
-    exact = Fraction(alpha) if isinstance(alpha, int) else Fraction(repr(float(alpha)))
+        raise ChannelError(f"alpha must be an int or float from 0 to 1, got {shown(alpha)}")
+    # Subclasses are read through int and float themselves, so their methods cannot interfere.
+    value = int.__int__(alpha) if isinstance(alpha, int) else float.__float__(alpha)
+    if not 0 <= value <= 1:
+        raise ChannelError(f"alpha must be from 0 to 1, got {shown(value)}")
+    exact = Fraction(value) if isinstance(value, int) else Fraction(repr(value))
     return math.floor(exact * 255 + Fraction(1, 2))
 
 
@@ -39,8 +47,12 @@ def css_alpha(byte: int) -> str:
     result is ``n / 100``, so 237 gives "0.93". Otherwise it is ``byte / 0.255`` rounded
     to an integer and divided by 1000, so 236 gives "0.925". Halves round up, there is
     always a leading zero and trailing zeros are dropped; 255 gives "1" and 0 gives "0".
+    Raises ChannelError for anything but an int from 0 to 255.
+
+    >>> css_alpha(237), css_alpha(236), css_alpha(128), css_alpha(255), css_alpha(0)
+    ('0.93', '0.925', '0.5', '1', '0')
     """
-    check_channel(byte, "alpha")
+    byte = check_channel(byte, "alpha")
     for percent in range(101):
         if (percent * 255 + 50) // 100 == byte:
             return _decimal(percent, 100)

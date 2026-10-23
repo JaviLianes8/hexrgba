@@ -50,6 +50,11 @@ def blend(foreground: Color | str, background: Color | str) -> Color:
     once, halves rounding up. An opaque foreground returns itself; a fully transparent
     foreground returns the background. If both are fully transparent the result is
     transparent black. Strings are parsed with :func:`parse_color` (lenient).
+
+    >>> blend("#0000ff80", "red")
+    Color(r=127, g=0, b=128, a=255)
+    >>> blend("#0000ff80", "#ff000080").hex
+    '#5500aac0'
     """
     fg = to_color(foreground)
     bg = to_color(background)

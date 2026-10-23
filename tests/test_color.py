@@ -101,7 +101,7 @@ def test_error_types_name_the_failing_family() -> None:
 def test_parse_color_rejects_non_strings() -> None:
     with pytest.raises(TypeError):
         parse_color(123)  # type: ignore[arg-type]
-    assert not is_color(None)  # type: ignore[arg-type]
+    assert not is_color(None)
 
 
 def test_color_parse_is_parse_color() -> None:
