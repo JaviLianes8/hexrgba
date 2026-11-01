@@ -8,7 +8,7 @@ Progress:
 - [x] Contracts, fetched specifications, reference implementations and seeded fuzz (6, 7, 9)
 - [x] README, GUIDE, dated CHANGELOG and production metadata (11-13)
 - [x] Wheel/CLI e2e, upgrade from PyPI 0.2.1, distribution inspection (8, 14)
-- [ ] Available interpreter matrix (10)
+- [x] Available interpreter matrix (10)
 - [x] Four gates (15), plus strict types for tests
 - [x] Mutation round (18)
 - [ ] Independent reviewer (16)
@@ -22,6 +22,31 @@ The 19 exports retain their parameter names, defaults and valid-input behavior.
 pickle/copy support, error inheritance and examples. The CHANGELOG lists all changes
 from 0.2.1, including argument errors, built-in subclass normalization, public pickle
 names, subclass preservation and bounded CLI errors. Public values contain no `Any`.
+An external consumer of the installed wheel also passes `mypy --strict`.
+
+## Preparation scorecard
+
+| Item | Status | Evidence |
+| --- | --- | --- |
+| 1 | PASS | Stable parameters/defaults; intentional changes in CHANGELOG and upgrade probe |
+| 2 | PASS | Exact `__all__`, no other public attributes; tests pin the 19 names |
+| 3 | PASS | Public function, class and method doctests; mapping example in package docs |
+| 4 | PASS | Strict mypy on source/tests and installed consumer; `py.typed` in wheel |
+| 5 | PASS | Typed errors, bounded messages, wrong-type and hostile-object contracts |
+| 6 | PASS | Behavioral contracts for every export, CLI and Color member |
+| 7 | PASS | Eleven re-fetched sources and three independently implemented libraries |
+| 8 | PASS | Installed wheel, CLI subprocesses, in-place upgrade and old pickle |
+| 9 | PASS | Seeded positive/negative fuzz, million-character input and scaling checks |
+| 10 | PASS | All twelve available CPython builds; installed-wheel matrix below |
+| 11 | PASS | Problem, scope, alternatives, absolute links, examples and twine check |
+| 12 | PASS | CHANGELOG 1.0.0 dated 2026-11-01 |
+| 13 | PASS | Production/Stable, 1.0.0, accurate Python floor/classifiers and project URLs |
+| 14 | PASS | Wheel and sdist contents inspected, LICENSE present, no downloaded text |
+| 15 | PASS | Four gates exit 0 independently; full suite 353 passed |
+| 16 | Pending | Independent reviewer has not run |
+| 17 | Pending | PR handoff, followed later by merge and publication |
+| 18 | PASS | Fifteen deliberate bugs killed; table below |
+| 19 | Pending | No QA lens verdicts recorded |
 
 ## Ground truth
 
@@ -95,8 +120,39 @@ One additional candidate, M07, removed only percentage 100. Exhaustive compariso
 all 256 valid bytes proved it equivalent: the fallback also emits `1` for byte 255.
 It is excluded from the 15 bugs above; M07b removes percentage 99 as well and is killed.
 
+## Installed interpreter matrix (item 10)
+
+Tests and docs were extracted from the sdist without its `src` directory. Each
+interpreter loaded the installed wheel in an isolated environment and ran the full
+suite, package doctests and a CLI subprocess from that external directory. The single
+skip is the build/e2e test, run separately with all 353 tests above. All fetched sources
+and the three reference libraries were present. Embedded interpreters were copied to
+scratch and given isolated package directories; other runtimes used fresh venvs.
+
+| CPython | Passed | Skipped |
+| --- | --- | --- |
+| 3.10.11 (embedded) | 352 | 1 |
+| 3.10.22 | 352 | 1 |
+| 3.11.9 (embedded) | 352 | 1 |
+| 3.11.11 (Blender runtime) | 352 | 1 |
+| 3.11.18 | 352 | 1 |
+| 3.12.10 (embedded) | 352 | 1 |
+| 3.12.16 | 352 | 1 |
+| 3.13.2 (embedded) | 352 | 1 |
+| 3.13.18 | 352 | 1 |
+| 3.14.6 | 352 | 1 |
+| 3.14.10 | 352 | 1 |
+| 3.14.10 free-threaded | 352 | 1 |
+
+The launcher also listed obsolete paths that no longer exist; filesystem discovery
+found the twelve distinct builds above. No supported minor version was unavailable.
+The package files in the final wheel are byte-identical to the initial matrix wheel.
+Initial launcher/dependency setup failures were corrected before these passing runs.
+
+Final wheel SHA-256: `88288bbba6982a07ff6363373c01358eb0d73d04a27a7079b45b820bc78529e0`.
+Final sdist SHA-256: `5222b7ca7976f1ad327f5c26d042ed7735c5f1e41835d870a5770a734d032372`.
+
 ## Remaining stages
 
-Interpreter results will be recorded below. Independent review and the
-five QA lenses have no recorded verdict yet. Merge and publication are out of scope
-for this preparation report.
+Items 1-15 and 18 are complete. Independent review and the five QA lenses have no
+recorded verdict yet. Merge and publication remain pending.
