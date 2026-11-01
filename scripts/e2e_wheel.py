@@ -7,6 +7,7 @@ Needs pip and network access for the build backend. Every example printed by
 
 from __future__ import annotations
 
+import json
 import os
 import shlex
 import subprocess
@@ -14,9 +15,11 @@ import sys
 import tarfile
 import tempfile
 import zipfile
+from email.parser import Parser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+UPGRADE = ROOT / "scripts" / "upgrade_probe.py"
 
 
 def run(cmd: list[str], *, cwd: Path, env: dict[str, str] | None = None) -> tuple[int, str, str]:
@@ -57,6 +60,19 @@ def main() -> int:
         names = zipfile.ZipFile(wheel).namelist()
         check("wheel ships py.typed", "hexrgba/py.typed" in names, names)
         check("wheel has no tests", not any(n.startswith(("tests/", "scripts/")) for n in names))
+        check("wheel ships LICENSE", any(n.endswith("/licenses/LICENSE") for n in names), names)
+        metadata_name = next(n for n in names if n.endswith("/METADATA"))
+        metadata = Parser().parsestr(zipfile.ZipFile(wheel).read(metadata_name).decode())
+        check("version metadata", metadata["Version"] == "1.0.0", metadata["Version"])
+        check("Python floor", metadata["Requires-Python"] == ">=3.10")
+        check(
+            "no runtime dependencies",
+            all("extra ==" in value for value in metadata.get_all("Requires-Dist", [])),
+        )
+        check(
+            "stable classifier",
+            "Development Status :: 5 - Production/Stable" in metadata.get_all("Classifier", []),
+        )
         entry = [n for n in names if n.endswith("entry_points.txt")]
         text = zipfile.ZipFile(wheel).read(entry[0]).decode() if entry else ""
         check("console script declared", "hexrgba = hexrgba._cli:main" in text, text)
@@ -69,6 +85,18 @@ def main() -> int:
             members = [n.split("/", 1)[-1] for n in sdist.getnames()]
         check("sdist ships the manifest", "tests/upstream/MANIFEST.json" in members, members)
         check("sdist has no WPT page", not any(n.endswith(".html") for n in members), members)
+        check(
+            "sdist ships LICENSE and upgrade probe",
+            "LICENSE" in members and "scripts/upgrade_probe.py" in members,
+        )
+        check(
+            "sdist has no caches or work files",
+            not any(
+                part in {"__pycache__", ".pytest_cache", ".git", "scratch", "venv", "dist"}
+                for name in members
+                for part in name.split("/")
+            ),
+        )
 
         venv = work / "venv"
         check("venv created", run([sys.executable, "-m", "venv", str(venv)], cwd=work)[0] == 0)
@@ -84,6 +112,8 @@ def main() -> int:
                 "Path('old.pickle').write_bytes(pickle.dumps(hexrgba.Color(1, 2, 3, 4)))"
             )
             check("PyPI baseline", run([python, "-I", "-c", probe], cwd=work)[0] == 0)
+            code, before, err = run([python, "-I", str(UPGRADE)], cwd=work)
+            check("PyPI consumer probe", code == 0, err)
         code, _, err = run(
             [python, "-m", "pip", "install", "--no-index", "--no-deps", str(wheel)], cwd=work
         )
@@ -109,6 +139,40 @@ def main() -> int:
         code, out, _ = run([python, "-I", "-c", probe], cwd=work, env=env)
         check("library import", code == 0 and out.strip() == "rgb(102, 51, 153)", out)
         if os.environ.get("HEXRGBA_E2E_PYPI") == "1":
+            code, after, err = run([python, "-I", str(UPGRADE)], cwd=work)
+            check("upgraded consumer probe", code == 0, err)
+            old, new = json.loads(before), json.loads(after)
+            check("seeded API results unchanged", old["digest"] == new["digest"])
+            check(
+                "0.2.1 behavior recorded",
+                old["changes"]
+                == [
+                    "AttributeError",
+                    "AttributeError",
+                    "True",
+                    "ValueError",
+                    "ValueError",
+                    "Color",
+                    "Color",
+                    "hexrgba._color",
+                ],
+                old,
+            )
+            check(
+                "documented 1.0.0 changes",
+                new["changes"]
+                == [
+                    "False",
+                    "TypeError",
+                    "TypeError",
+                    "TypeError",
+                    "ChannelError",
+                    "Shade",
+                    "Shade",
+                    "hexrgba",
+                ],
+                new,
+            )
             probe = (
                 "import hexrgba, pickle; from pathlib import Path; "
                 "assert hexrgba.__version__ == '1.0.0'; "

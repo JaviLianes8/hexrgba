@@ -10,7 +10,7 @@ Progress:
 - [x] Wheel/CLI e2e, upgrade from PyPI 0.2.1, distribution inspection (8, 14)
 - [ ] Available interpreter matrix (10)
 - [x] Four gates (15), plus strict types for tests
-- [ ] Mutation round (18)
+- [x] Mutation round (18)
 - [ ] Independent reviewer (16)
 - [ ] Five QA lenses (19)
 - [ ] PR handoff (17); merge and publication remain pending
@@ -48,24 +48,55 @@ outside the distribution. `HEXRGBA_UPSTREAM` selects their local directory.
 
 ## Checks completed
 
-`ruff format --check .`, `ruff check .`, `mypy --strict src tests` and `pytest`
-pass. The suite has 352 passing tests with one opt-in wheel test skipped; that test's
-script passed separately with `HEXRGBA_E2E_PYPI=1`. Every test has a 300-second limit.
+`ruff format --check .`, `ruff check .`, `mypy --strict src`, `mypy --strict src tests`
+and `pytest` each exit 0. With `HEXRGBA_E2E=1` and `HEXRGBA_E2E_PYPI=1`, the suite
+passes all 353 tests in 56.35 seconds. Every test has a 300-second limit.
 
 The e2e script builds both distributions, installs the wheel in a fresh venv, executes
 all ten help examples through the installed console script, checks invalid input and
 `python -m hexrgba`, imports with `-I`, then confirms upgrade values and an old pickle.
+The upgrade probe compares all 149 keywords and 1,000 seeded RGBA/background pairs
+across the API (22 outputs per pair), plus eight explicit changed behaviors against
+the installed 0.2.1 release. All stable results match and all eight changes are confirmed.
 Both distributions pass `twine check --strict`. The wheel contains only the package,
 typing marker and distribution metadata including LICENSE. The sdist contains source,
-tests, the derived color table, manifest, two test utilities, README, GUIDE, CHANGELOG,
+tests, the derived color table, manifest, three test utilities, README, GUIDE, CHANGELOG,
 LICENSE and pyproject; no fetched pages, caches or scratch files.
 
 Seeded tests cover 3,000 random RGBA values and 9,000 hostile strings; additional
 million-character inputs verify bounded errors and linear scaling. Numeric and string
 subclasses, unprintable objects, huge integers and closed CLI output are covered.
 
+## Mutation round (item 18)
+
+Each change was applied alone in a separate scratch copy. The unchanged contract suite
+ran with `pytest tests -x`, no bytecode, and a 300-second timeout per test. All 15 real
+bugs were killed by assertion failures, not by collection or syntax failures.
+
+| ID | Injected bug | Test that failed |
+| --- | --- | --- |
+| M01 | Missing alpha becomes 254 | `test_blend_accepts_color_objects_and_names` |
+| M02 | Shorthand appends zero instead of repeating digit | `test_serializes_like_css_color_4` |
+| M03 | Red and blue swapped | `test_spec_example_0000ffcc_is_80_percent` |
+| M04 | Boolean channels accepted | `test_css_alpha_rejects_non_bytes` |
+| M05 | Normalization drops alpha 254 | `test_every_textual_form_parses_back_to_the_same_color` |
+| M06 | Alpha conversion truncates instead of rounding | `test_every_byte_round_trips_through_the_exact_float` |
+| M07b | Omit percentage 99 from CSS serialization search | `test_every_whole_percentage_serializes_with_two_decimals_at_most` |
+| M08 | Strict parser permits surrounding whitespace | `test_surrounding_space_is_lenient_only` |
+| M09 | Unicode case-folding accepts Kelvin-sign keyword | `test_rejected_in_both_modes` |
+| M10 | Alpha divides by 256 | `test_alpha_float_is_exact_byte_over_255` |
+| M11 | Blending ignores foreground | `test_opaque_foreground_wins_and_transparent_foreground_vanishes` |
+| M12 | Red luminance weight 0.2127 | `test_contrast_agrees_with_wcag_contrast_ratio` |
+| M13 | Translucent contrast background accepted | `test_errors_go_to_stderr_with_exit_2` |
+| M14 | ChannelError loses HexColorError inheritance | `test_error_hierarchy_keeps_value_error` |
+| M15 | CLI invalid input exits 1 | `test_errors_go_to_stderr_with_exit_2` |
+
+One additional candidate, M07, removed only percentage 100. Exhaustive comparison of
+all 256 valid bytes proved it equivalent: the fallback also emits `1` for byte 255.
+It is excluded from the 15 bugs above; M07b removes percentage 99 as well and is killed.
+
 ## Remaining stages
 
-Interpreter and mutation results will be recorded below. Independent review and the
+Interpreter results will be recorded below. Independent review and the
 five QA lenses have no recorded verdict yet. Merge and publication are out of scope
 for this preparation report.
