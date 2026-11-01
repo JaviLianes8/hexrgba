@@ -74,6 +74,16 @@ def main() -> int:
         check("venv created", run([sys.executable, "-m", "venv", str(venv)], cwd=work)[0] == 0)
         bindir = venv / ("Scripts" if os.name == "nt" else "bin")
         python = str(bindir / "python")
+        if os.environ.get("HEXRGBA_E2E_PYPI") == "1":
+            code, _, err = run([python, "-m", "pip", "install", "hexrgba==0.2.1"], cwd=work)
+            check("PyPI 0.2.1 installs", code == 0, err[-2000:])
+            probe = (
+                "import hexrgba, pickle; from pathlib import Path; "
+                "assert hexrgba.__version__ == '0.2.1'; "
+                "assert hexrgba.parse('#1234') == (17, 34, 51, 68); "
+                "Path('old.pickle').write_bytes(pickle.dumps(hexrgba.Color(1, 2, 3, 4)))"
+            )
+            check("PyPI baseline", run([python, "-I", "-c", probe], cwd=work)[0] == 0)
         code, _, err = run(
             [python, "-m", "pip", "install", "--no-index", "--no-deps", str(wheel)], cwd=work
         )
@@ -82,7 +92,7 @@ def main() -> int:
         env = {"PATH": os.environ.get("PATH", ""), "SYSTEMROOT": os.environ.get("SYSTEMROOT", "")}
 
         code, out, _ = run([tool, "--version"], cwd=work, env=env)
-        check("--version", code == 0 and out.strip().startswith("hexrgba 0.2"), out)
+        check("--version", code == 0 and out.strip() == "hexrgba 1.0.0", out)
         code, out, _ = run([tool, "--help"], cwd=work, env=env)
         check("--help shows examples", code == 0 and "examples" in out, out)
         examples = help_examples(out)
@@ -96,8 +106,19 @@ def main() -> int:
         code, out, _ = run([python, "-m", "hexrgba", "normalize", "BLACK"], cwd=work, env=env)
         check("python -m hexrgba", (code, out.strip()) == (0, "#000000"), out)
         probe = "import hexrgba; print(hexrgba.Color.parse('rebeccapurple').to_css())"
-        code, out, _ = run([python, "-c", probe], cwd=work, env=env)
-        check("library import", out.strip() == "rgb(102, 51, 153)", out)
+        code, out, _ = run([python, "-I", "-c", probe], cwd=work, env=env)
+        check("library import", code == 0 and out.strip() == "rgb(102, 51, 153)", out)
+        if os.environ.get("HEXRGBA_E2E_PYPI") == "1":
+            probe = (
+                "import hexrgba, pickle; from pathlib import Path; "
+                "assert hexrgba.__version__ == '1.0.0'; "
+                "assert hexrgba.parse('#1234') == (17, 34, 51, 68); "
+                "assert pickle.loads(Path('old.pickle').read_bytes()) == hexrgba.Color(1, 2, 3, 4)"
+            )
+            check(
+                "upgrade keeps values and pickles",
+                run([python, "-I", "-c", probe], cwd=work)[0] == 0,
+            )
     print("e2e: all checks passed")
     return 0
 

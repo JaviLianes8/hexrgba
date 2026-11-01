@@ -6,6 +6,37 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-01
+
+### Stable
+
+- The 19-name public API: hex and CSS named colors, immutable `Color`, exact byte
+  alpha conversions, CSS serialization, WCAG contrast, blending and typed value errors.
+- Python 3.10 through 3.14, zero runtime dependencies, and the four CLI commands.
+
+### Changed
+
+- `is_hex` returns `False` for non-strings. Text parsers (`parse`, `parse_color`,
+  `normalize`, `shorten`, `Color.parse`, and color-taking helpers) raise `TypeError`
+  for wrong argument types rather than accidental `AttributeError`.
+- String and numeric subclasses are read through their underlying built-in values;
+  `Color` stores plain `int` channels. Their overridden conversion, comparison or
+  formatting methods no longer change results.
+- `passes_contrast` rejects a non-string `level` and non-boolean `large` with
+  `TypeError`; unknown string levels still raise `ValueError`.
+- Error messages are bounded, integers over 128 bits are described by size, and
+  objects whose representation fails still raise the documented error type.
+- `Color` and the error classes identify and pickle as public `hexrgba` names;
+  pickles written by 0.2.1 remain readable.
+- `Color.parse` and `with_alpha` preserve a `Color` subclass instead of returning
+  the base `Color`. Predicates are typed to accept `object` to match their runtime use.
+- CLI usage errors are bounded. A closed output exits 1 without a traceback.
+
+### Verified
+
+- Runnable public examples, strict typing, specification and reference checks,
+  seeded fuzz, wheel/CLI installation and upgrade, and mutation-tested contracts.
+
 ## [0.2.1] - 2026-10-13
 
 ### Changed

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import io
 import math
-import os
 import re
 import sys
 from collections.abc import Sequence
@@ -148,4 +148,5 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 def _silence_stdout() -> None:
     with contextlib.suppress(OSError, ValueError):
-        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+        sys.stdout.close()
+    sys.stdout = io.StringIO()
