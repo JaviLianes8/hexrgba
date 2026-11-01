@@ -91,9 +91,15 @@ channels, using the `0.04045` threshold of the current WCAG definition (older te
 ignored.
 
 `contrast_ratio(fg, bg)` is `(L1 + 0.05) / (L2 + 0.05)` with `L1` the lighter, from 1 to 21.
-A translucent foreground is first blended over the background and rounded to 8-bit
-channels, as a browser paints it; the ratio is measured on that painted color. The background must be
-opaque, because what lies behind it is unknown.
+A translucent foreground uses ideal source-over arithmetic, rounded once to 8-bit
+channels before measuring the ratio. The background must be opaque, because what lies
+behind it is unknown. Browser rendering pipelines can produce different pixels and
+pass/fail decisions near a threshold. Supply measured opaque colors when assessing
+actual rendering.
+
+For example, `#9212a4ce` over `#1dedb3` gives an ideal composite of `#7c3ca7` and a
+ratio of about 4.513298, passing AA. If a renderer instead produces `#7c3da6`, its
+ratio is about 4.493067, failing AA. The library does not promise browser pixel equality.
 
 `passes_contrast(fg, bg, level="AA", large=False)` compares without rounding, as WCAG
 requires (4.499 fails 4.5):
@@ -117,7 +123,9 @@ Co = (Cs as + Cb ab (1 - as)) / ao
 ```
 
 It is computed with exact fractions and each channel is rounded to a byte once, halves
-up. If both inputs are fully transparent the result is transparent black.
+up. The result is a new base `Color`, including when an input is a subclass. An
+opaque foreground produces its own RGBA channels; a transparent foreground produces
+the background channels. If both inputs are fully transparent the result is transparent black.
 
 ## Errors
 
@@ -133,8 +141,11 @@ Color value errors are `ValueError` subclasses:
 for non-string input. `is_color` and `is_hex` return `False` for non-strings.
 `passes_contrast` raises `TypeError` for a non-string level or non-boolean `large`,
 and `ValueError` for a level other than AA or AAA (case-insensitive).
-Messages show at most 40 characters of a value's representation plus an ellipsis;
-integers wider than 128 bits are described by their bit length.
+Messages describe expected types, ranges and syntax without including input values or
+custom type names. Rejection does not call object representations or traverse container
+contents. This replaces the former 40-character representation preview, which could
+expose secrets even when truncated. CLI usage errors also omit argument contents;
+use the command's `--help` for syntax and allowed choices.
 
 ## Upgrading from 0.2.1
 
@@ -142,10 +153,12 @@ The 19 exported names, parameter names, defaults and valid-input results remain 
 Wrong text argument types now give `TypeError` instead of accidental `AttributeError`;
 `is_hex` returns `False`. Numeric and string subclasses are read as their underlying
 built-in values. `Color` stores plain integer channels. Bad `level` and `large` types
-are rejected explicitly. Large values and unprintable objects give bounded messages.
+are rejected explicitly. Type checks use actual types without consulting instance `__class__` hooks.
+Invalid values give bounded diagnostics without rendering their contents.
 Public classes now pickle under `hexrgba`; existing 0.2.1 pickles still load.
 `Color.parse` and `with_alpha` preserve subclasses. Predicates accept `object` in typing.
-The CLI bounds usage errors and exits 1 quietly if its output closes early.
+The CLI omits input values from errors and exits 1 quietly if its output closes early,
+including during `--help` and `--version`.
 See the CHANGELOG for the complete list.
 
 ## Command line

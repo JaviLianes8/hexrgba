@@ -24,14 +24,16 @@ SRC = str(Path(__file__).resolve().parents[1] / "src")
         ["normalize", "red", "extra", *(["w" * 1000] * 1000)],
     ],
 )
-def test_usage_errors_quote_huge_arguments_briefly(
+def test_usage_errors_omit_huge_arguments(
     capsys: pytest.CaptureFixture[str], args: list[str]
 ) -> None:
     with pytest.raises(SystemExit) as exc:
         main(args)
     assert exc.value.code == 2
     err = capsys.readouterr().err
-    assert len(err.splitlines()[-1]) <= 520 and "..." in err
+    assert err.splitlines()[-1].endswith(
+        "error: invalid command or arguments; use --help for syntax and choices"
+    )
 
 
 @pytest.mark.parametrize("command", ["normalize", "convert", "blend", "contrast"])
@@ -44,12 +46,16 @@ def test_a_huge_color_gives_a_short_error_in_every_command(
     assert out == "" and len(err) < 200 and err.startswith("hexrgba: error:")
 
 
-def test_a_closed_output_exits_1_quietly() -> None:
+@pytest.mark.parametrize(
+    "args",
+    [["convert", "red"], ["--help"], ["--version"], ["normalize", "--help"]],
+)
+def test_a_closed_output_exits_1_quietly(args: list[str]) -> None:
     read_end, write_end = os.pipe()
     os.close(read_end)
     try:
         done = subprocess.run(
-            [sys.executable, "-m", "hexrgba", "convert", "red"],
+            [sys.executable, "-m", "hexrgba", *args],
             stdout=write_end,
             stderr=subprocess.PIPE,
             env={**os.environ, "PYTHONPATH": SRC},

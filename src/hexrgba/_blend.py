@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import math
 from fractions import Fraction
+from typing import cast
 
 from ._color import Color, parse_color
 
@@ -18,7 +19,7 @@ _HALF = Fraction(1, 2)
 
 def to_color(value: Color | str) -> Color:
     """Return value unchanged if it is a Color, else parse it leniently."""
-    return value if isinstance(value, Color) else parse_color(value)
+    return cast(Color, value) if issubclass(type(value), Color) else parse_color(cast(str, value))
 
 
 def composite(
@@ -47,9 +48,10 @@ def blend(foreground: Color | str, background: Color | str) -> Color:
     """Composite foreground over background and return the result as a Color.
 
     The math is exact (fractions); each output channel is rounded to the nearest byte
-    once, halves rounding up. An opaque foreground returns itself; a fully transparent
-    foreground returns the background. If both are fully transparent the result is
-    transparent black. Strings are parsed with :func:`parse_color` (lenient).
+    once, halves rounding up. The result is a new base Color. An opaque foreground
+    produces its own RGBA channels; a fully transparent foreground produces the
+    background channels, except that two fully transparent inputs produce transparent
+    black. Strings are parsed with :func:`parse_color` (lenient).
 
     >>> blend("#0000ff80", "red")
     Color(r=127, g=0, b=128, a=255)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ._errors import ChannelError, HexColorError, shown, text_argument
+from ._errors import ChannelError, HexColorError, text_argument
 
 _VALID_LENGTHS = frozenset({3, 4, 6, 8})
 _HEX_DIGITS = frozenset("0123456789abcdefABCDEF")
@@ -18,10 +18,10 @@ def is_hex_body(body: str) -> bool:
     return len(body) in _VALID_LENGTHS and all(ch in _HEX_DIGITS for ch in body)
 
 
-def decode(body: str, original: str) -> tuple[int, int, int, int]:
-    """Decode a hash-less hex body into channels, naming original in the error."""
+def decode(body: str) -> tuple[int, int, int, int]:
+    """Decode a hash-less hex body into channels."""
     if not is_hex_body(body):
-        raise HexColorError(f"not a valid hex color: {shown(original)}")
+        raise HexColorError("not a valid hex color; expected 3, 4, 6 or 8 ASCII hex digits")
     if len(body) in (3, 4):
         body = "".join(ch * 2 for ch in body)
     r = int(body[0:2], 16)
@@ -40,7 +40,7 @@ def is_hex(value: object) -> bool:
     >>> is_hex("#f00"), is_hex("ff000080"), is_hex("#12345"), is_hex(None)
     (True, True, False, False)
     """
-    return isinstance(value, str) and is_hex_body(_body(value))
+    return issubclass(type(value), str) and is_hex_body(_body(value))
 
 
 def parse(value: str) -> tuple[int, int, int, int]:
@@ -56,17 +56,17 @@ def parse(value: str) -> tuple[int, int, int, int]:
     >>> parse("abc")
     (170, 187, 204, 255)
     """
-    return decode(_body(value), value)
+    return decode(_body(value))
 
 
 def check_channel(value: int, name: str) -> int:
     """Return value as a plain int if it is an int from 0 to 255, else raise ChannelError."""
-    if not isinstance(value, int) or isinstance(value, bool):
-        raise ChannelError(f"{name} must be an int from 0 to 255, got {shown(value)}")
+    if not issubclass(type(value), int) or type(value) is bool:
+        raise ChannelError(f"{name} must be an int from 0 to 255")
     # An int subclass is read through int itself, so its own methods cannot change it.
     plain = int.__int__(value)
     if not 0 <= plain <= 255:
-        raise ChannelError(f"{name} must be from 0 to 255, got {shown(plain)}")
+        raise ChannelError(f"{name} must be from 0 to 255")
     return plain
 
 

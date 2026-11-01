@@ -40,7 +40,7 @@ def test_predicates_say_false_for_anything_but_a_str(value: object) -> None:
 def test_parsers_raise_type_error_for_anything_but_a_str(
     function: Callable[[str], object], value: object
 ) -> None:
-    with pytest.raises(TypeError, match=r"^color must be a str, got [A-Za-z]+$"):
+    with pytest.raises(TypeError, match=r"^color must be a str$"):
         function(value)  # type: ignore[arg-type]
 
 
@@ -117,10 +117,10 @@ def test_channel_errors_stay_channel_errors_with_short_messages(call: Callable[[
     assert len(str(caught.value)) < 120
 
 
-def test_huge_ints_are_described_by_their_size() -> None:
-    with pytest.raises(ChannelError, match=r"got an int of 16610 bits$"):
+def test_invalid_values_are_described_only_by_the_expected_range() -> None:
+    with pytest.raises(ChannelError, match=r"^r must be from 0 to 255$"):
         Color(10**5000, 0, 0)
-    with pytest.raises(ChannelError, match=r"got a Unprintable object$"):
+    with pytest.raises(ChannelError, match=r"^alpha must be an int or float from 0 to 1$"):
         alpha_to_byte(Unprintable())  # type: ignore[arg-type]
 
 
@@ -145,16 +145,16 @@ HUGE = "#" + "f" * 1_000_000
 def test_huge_input_gives_a_short_message(call: Callable[[], object]) -> None:
     with pytest.raises(ValueError) as caught:
         call()
-    assert len(str(caught.value)) < 120 and "..." in str(caught.value)
+    assert len(str(caught.value)) < 120
 
 
 def test_passes_contrast_checks_its_options() -> None:
-    with pytest.raises(TypeError, match="level must be a str, got NoneType"):
+    with pytest.raises(TypeError, match=r"^level must be a str$"):
         passes_contrast("red", "blue", level=None)  # type: ignore[arg-type]
     for large in ("yes", 1, None):
         with pytest.raises(TypeError, match="large must be a bool"):
             passes_contrast("red", "blue", large=large)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match=r"^level must be 'AA' or 'AAA' in any case, got 'A'$"):
+    with pytest.raises(ValueError, match=r"^level must be 'AA' or 'AAA' in any case$"):
         passes_contrast("red", "blue", level="A")
 
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 
 from ._alpha import alpha_to_byte, css_alpha
-from ._errors import ColorNameError, HexColorError, shown, text_argument
+from ._errors import ColorNameError, HexColorError, text_argument
 from ._hex import check_channel, decode, is_hex_body, shorten, to_hex
 from ._names import NAMED_COLORS
 
@@ -165,20 +165,20 @@ def parse_color(text: str, *, strict: bool = False) -> Color:
     body = original.strip()
     if strict and body != original:
         error = HexColorError if body.startswith("#") else ColorNameError
-        raise error(f"surrounding whitespace is not allowed in strict mode: {shown(original)}")
+        raise error("surrounding whitespace is not allowed in strict mode")
     if body.startswith("#"):
-        return Color(*decode(body[1:], original))
+        return Color(*decode(body[1:]))
     key = body.translate(_ASCII_LOWER)
     if key == "transparent":
         return _TRANSPARENT
     value = NAMED_COLORS.get(key)
     if value is not None:
-        return Color(*decode(value[1:], original))
+        return Color(*decode(value[1:]))
     if is_hex_body(body):
         if strict:
-            raise HexColorError(f"hex color needs a leading '#' in strict mode: {shown(original)}")
-        return Color(*decode(body, original))
-    raise ColorNameError(f"not a hex color or CSS named color: {shown(original)}")
+            raise HexColorError("hex color needs a leading '#' in strict mode")
+        return Color(*decode(body))
+    raise ColorNameError("not a hex color or CSS named color")
 
 
 def is_color(text: object, *, strict: bool = False) -> bool:
@@ -189,10 +189,10 @@ def is_color(text: object, *, strict: bool = False) -> bool:
     >>> is_color("rebeccapurple"), is_color("ffaa00", strict=True), is_color(42)
     (True, False, False)
     """
-    if not isinstance(text, str):
+    if not issubclass(type(text), str):
         return False
     try:
-        parse_color(text, strict=strict)
+        parse_color(text_argument(text, "color"), strict=strict)
     except ValueError:
         return False
     return True

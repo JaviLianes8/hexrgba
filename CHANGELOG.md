@@ -24,18 +24,31 @@ All notable changes to this project are documented here. The format follows
   formatting methods no longer change results.
 - `passes_contrast` rejects a non-string `level` and non-boolean `large` with
   `TypeError`; unknown string levels still raise `ValueError`.
-- Error messages are bounded, integers over 128 bits are described by size, and
-  objects whose representation fails still raise the documented error type.
+- Error messages describe expected types, ranges and syntax without echoing input
+  values or custom type names. This replaces truncated representation previews and
+  integer bit lengths. Rejection never calls `repr` or traverses container contents.
+- Type validation uses actual types without calling instance `__class__` hooks;
+  genuine numeric and string subclasses retain their underlying built-in behavior.
 - `Color` and the error classes identify and pickle as public `hexrgba` names;
   pickles written by 0.2.1 remain readable.
 - `Color.parse` and `with_alpha` preserve a `Color` subclass instead of returning
   the base `Color`. Predicates are typed to accept `object` to match their runtime use.
-- CLI usage errors are bounded. A closed output exits 1 without a traceback.
+- CLI usage errors omit argument contents and point to `--help` for syntax and choices.
+  A closed output exits 1 without a traceback, including `--help` and `--version`.
+
+### Clarified
+
+- `blend` returns a new base `Color` with the composited RGBA channels; it does not
+  reuse operands or preserve their subclasses.
+- Translucent contrast uses ideal source-over arithmetic rounded once to bytes.
+  Browser rendering may differ, including AA/AAA decisions near thresholds.
 
 ### Verified
 
 - Runnable public examples, strict typing, specification and reference checks,
   seeded fuzz, wheel/CLI installation and upgrade, and mutation-tested contracts.
+- Exact explicit opaque-alpha formatting, strict parsing through `Color` subclasses,
+  alpha-independent luminance, and diagnostics at the former preview boundaries.
 
 ## [0.2.1] - 2026-10-13
 

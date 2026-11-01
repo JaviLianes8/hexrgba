@@ -46,7 +46,7 @@ An external consumer of the installed wheel also passes `mypy --strict`.
 | 16 | Pending | Independent reviewer has not run |
 | 17 | Ready | PR #4 from release/1.0.0 to main; merge and publication pending |
 | 18 | PASS | Fifteen deliberate bugs killed; table below |
-| 19 | Pending | No QA lens verdicts recorded |
+| 19 | Pending | Round 1: all five lenses reported findings; fixes below await re-review |
 
 ## Ground truth
 
@@ -152,7 +152,47 @@ Initial launcher/dependency setup failures were corrected before these passing r
 Final wheel SHA-256: `88288bbba6982a07ff6363373c01358eb0d73d04a27a7079b45b820bc78529e0`.
 Final sdist SHA-256: `5222b7ca7976f1ad327f5c26d042ed7735c5f1e41835d870a5770a734d032372`.
 
+## QA round 1: findings and fixes
+
+Date: 2026-11-01. Reviewed head: `2d8e92f91948ad442117bdcf084959fdba35c862`.
+Fix commit: the commit titled `fix round one certification findings` containing this section.
+All ten findings are accepted. Each lens initially reported FAIL; independent
+re-verification remains pending. Public names, signatures and color arithmetic are unchanged.
+
+| Lens | Finding | Correction and verification |
+| --- | --- | --- |
+| a | A-001 | `blend` documents a new base `Color` and equivalent RGBA channels, including the transparent-black exception; subclass operand probes confirm this behavior. |
+| b | B-001 | GUIDE and `contrast_ratio` describe ideal source-over arithmetic rounded once, possible rendering differences and threshold crossings. The documented example gives 4.513298 for the ideal composite and 4.493067 for the alternate opaque pixel. |
+| c | C-01 | API errors omit input values and custom type names. CLI usage errors omit arguments and point to help. Sentinel tests cover parsers, numeric validators, contrast options and CLI syntax errors. |
+| c | C-02 | Validation checks actual types without instance `__class__` hooks, preserving built-in subclass values and documented rejection types. Predicates and color helpers are covered. |
+| c | C-03 | Removed representation formatting entirely. Object and shared-container rejection never calls `repr`; a subprocess watchdog covers a blocking representation. |
+| d | D-01 | Protected stdout flushing includes argparse early exits. Closed-pipe subprocess tests cover normal commands, help, subcommand help and version, requiring exit 1 and empty stderr. |
+| e | E-01 | Exact strings distinguish omitted alpha from explicit alpha 255; replayed M09 fails `test_explicit_opaque_alpha_is_retained`. |
+| e | E-02 | Strict rejection and lenient acceptance cover hashless and whitespace-wrapped hex through `Color.parse` and a subclass; replayed M18 fails `test_color_parse_forwards_strict_mode`. |
+| e | E-03 | Luminance equality covers four RGB triples and five alpha bytes, using objects and strings; replayed M39 fails `test_relative_luminance_ignores_alpha`. |
+| e | E-04 | The unsafe 40-character preview contract is superseded by C-01/C-03. Exact diagnostics at representation lengths 40 and 41 now require no preview. Reintroducing a 41-character preview fails both boundary assertions. |
+
+Behavioral regression tests were added before implementation changes: 33 failed and
+39 passed against the reviewed code. After correction, the targeted suite passed all
+168 cases. The original lens-c `test_findings.py` also passed all nine repro cases.
+The three surviving behavior mutations were replayed separately in scratch copies;
+each exited 1 due to the new assertion. The obsolete preview limit was removed, and
+a replacement mutation that restores input rendering was rejected.
+
+`ruff format --check .`, `ruff check .`, `mypy --strict src` and
+`mypy --strict src tests` each exit 0. The full suite passes **415 tests, no skips**,
+including doctests, fetched specifications, reference implementations, wheel/CLI e2e
+and the upgrade from PyPI 0.2.1. Pytest-timeout enforces 300 seconds per test.
+Eight additional closed-pipe cases pass against a freshly installed wheel, covering
+both the console launcher and isolated module execution with empty stderr and exit 1.
+This round ran locally on CPython 3.14.6; the preparation matrix above is historical.
+All behavior changes and corrected documentation are recorded in CHANGELOG.
+
+Evidence is retained under `scratch/hexrgba-cert/fix-r1/`: `baseline.log`, `full.log`,
+`mutation-results.json`, `installed-closed-pipe.json` and the individual mutation logs.
+No findings are disputed.
+
 ## Remaining stages
 
-Items 1-15 and 18 are complete. Independent review and the five QA lenses have no
-recorded verdict yet. Merge and publication remain pending.
+Preparation checks and the round 1 fixes are complete. The independent review and
+five-lens re-verification remain pending. Merge and publication remain pending.

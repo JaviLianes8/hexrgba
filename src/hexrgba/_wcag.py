@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from ._blend import blend, to_color
 from ._color import Color
-from ._errors import ColorError, shown, type_name
+from ._errors import ColorError, text_argument
 
 # (level, large text) -> minimum ratio. Compared without rounding, as WCAG requires.
 _THRESHOLDS = {("AA", False): 4.5, ("AA", True): 3.0, ("AAA", False): 7.0, ("AAA", True): 4.5}
@@ -43,7 +43,9 @@ def contrast_ratio(foreground: Color | str, background: Color | str) -> float:
 
     L1 is the lighter luminance, so the order of two opaque colors does not matter. A
     translucent foreground is first composited over the background with :func:`blend`
-    and rounded to 8-bit channels, as a browser paints it.
+    using ideal source-over arithmetic rounded once to 8-bit channels. Browser
+    rendering can differ, including pass/fail decisions near contrast thresholds.
+    Supply measured opaque colors to assess actual rendered pixels.
     The background must be opaque, since what lies behind it is unknown: a translucent
     background raises ColorError.
 
@@ -54,7 +56,7 @@ def contrast_ratio(foreground: Color | str, background: Color | str) -> float:
     """
     bg = to_color(background)
     if not bg.is_opaque:
-        raise ColorError(f"background must be opaque to measure contrast, got {bg.hex}")
+        raise ColorError("background must be opaque to measure contrast")
     fg = blend(foreground, bg)
     first, second = relative_luminance(fg), relative_luminance(bg)
     lighter, darker = max(first, second), min(first, second)
@@ -80,11 +82,10 @@ def passes_contrast(
     >>> passes_contrast("#777777", "white", large=True)
     True
     """
-    if not isinstance(level, str):
-        raise TypeError(f"level must be a str, got {type_name(level)}")
-    if not isinstance(large, bool):
-        raise TypeError(f"large must be a bool, got {type_name(large)}")
+    level = text_argument(level, "level")
+    if type(large) is not bool:
+        raise TypeError("large must be a bool")
     key = (str.upper(level), large)
     if key not in _THRESHOLDS:
-        raise ValueError(f"level must be 'AA' or 'AAA' in any case, got {shown(level)}")
+        raise ValueError("level must be 'AA' or 'AAA' in any case")
     return contrast_ratio(foreground, background) >= _THRESHOLDS[key]

@@ -6,7 +6,6 @@ import argparse
 import contextlib
 import io
 import math
-import re
 import sys
 from collections.abc import Sequence
 from typing import NoReturn
@@ -43,11 +42,10 @@ EXIT_OUTPUT_CLOSED = 1
 
 
 class _Parser(argparse.ArgumentParser):
-    """An argument parser whose usage errors quote at most 40 characters of any word."""
+    """An argument parser whose usage errors never include argument contents."""
 
     def error(self, message: str) -> NoReturn:
-        message = re.sub(r"\S{41,}", lambda word: word.group()[:40] + "...", message)
-        super().error(message[:500])
+        super().error("invalid command or arguments; use --help for syntax and choices")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -97,7 +95,7 @@ def _convert(color: Color, target: str) -> str:
         return " ".join(str(channel) for channel in color.as_tuple())
     if target == "name":
         if color.name is None:
-            raise ColorError(f"no CSS named color equals {color.hex}")
+            raise ColorError("no CSS named color equals the supplied color")
         return color.name
     return color.to_css()
 
@@ -129,12 +127,15 @@ def _run(args: argparse.Namespace) -> int:
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the command-line interface and return a process exit code."""
     parser = _build_parser()
-    args = parser.parse_args(argv)
-    if args.command == "contrast" and args.large and not args.level:
-        parser.error("--large only applies together with --level")
     try:
-        code = _run(args)
-        sys.stdout.flush()
+        try:
+            args = parser.parse_args(argv)
+            if args.command == "contrast" and args.large and not args.level:
+                parser.error("--large only applies together with --level")
+            code = _run(args)
+        finally:
+            # Help and version exit inside argparse, before normal command execution.
+            sys.stdout.flush()
     except (ColorError, TypeError) as exc:
         print(f"hexrgba: error: {exc}", file=sys.stderr)
         return EXIT_BAD_INPUT

@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import math
 from fractions import Fraction
+from typing import cast
 
-from ._errors import ChannelError, shown
+from ._errors import ChannelError
 from ._hex import check_channel
 
 
@@ -30,12 +31,14 @@ def alpha_to_byte(alpha: float) -> int:
     >>> alpha_to_byte(128 / 255)
     128
     """
-    if isinstance(alpha, bool) or not isinstance(alpha, (int, float)):
-        raise ChannelError(f"alpha must be an int or float from 0 to 1, got {shown(alpha)}")
+    if type(alpha) is bool or not issubclass(type(alpha), (int, float)):
+        raise ChannelError("alpha must be an int or float from 0 to 1")
     # Subclasses are read through int and float themselves, so their methods cannot interfere.
-    value = int.__int__(alpha) if isinstance(alpha, int) else float.__float__(alpha)
+    value = (
+        int.__int__(cast(int, alpha)) if issubclass(type(alpha), int) else float.__float__(alpha)
+    )
     if not 0 <= value <= 1:
-        raise ChannelError(f"alpha must be from 0 to 1, got {shown(value)}")
+        raise ChannelError("alpha must be from 0 to 1")
     exact = Fraction(value) if isinstance(value, int) else Fraction(repr(value))
     return math.floor(exact * 255 + Fraction(1, 2))
 

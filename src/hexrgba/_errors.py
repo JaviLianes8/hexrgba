@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 
 class ColorError(ValueError):
     """Base class for every error this library raises about a color value.
@@ -11,7 +13,7 @@ class ColorError(ValueError):
     ...     contrast_ratio("black", "#ffffff80")
     ... except ColorError as error:
     ...     print(error)
-    background must be opaque to measure contrast, got #ffffff80
+    background must be opaque to measure contrast
     """
 
 
@@ -23,7 +25,7 @@ class HexColorError(ColorError):
     ...     parse("#12345")
     ... except HexColorError as error:
     ...     print(error)
-    not a valid hex color: '#12345'
+    not a valid hex color; expected 3, 4, 6 or 8 ASCII hex digits
     """
 
 
@@ -38,7 +40,7 @@ class ChannelError(HexColorError):
     ...     to_hex(256, 0, 0)
     ... except ChannelError as error:
     ...     print(error)
-    r must be from 0 to 255, got 256
+    r must be from 0 to 255
     """
 
 
@@ -50,42 +52,12 @@ class ColorNameError(ColorError):
     ...     parse_color("reddish")
     ... except ColorNameError as error:
     ...     print(error)
-    not a hex color or CSS named color: 'reddish'
+    not a hex color or CSS named color
     """
-
-
-_SHOWN_LIMIT = 40
-# An int wider than this is described by its size: printing it costs quadratic time and
-# beyond 4300 digits Python refuses to print it at all.
-_SHOWN_BITS = 128
-
-
-def shown(value: object) -> str:
-    """Return ``repr(value)`` cut to a short prefix, so huge inputs keep messages small.
-
-    It never raises: a huge int is described by its size and an object whose ``repr``
-    fails is described by its type.
-    """
-    if isinstance(value, int) and int.bit_length(value) > _SHOWN_BITS:
-        return f"an int of {int.bit_length(value)} bits"
-    if isinstance(value, str):
-        # Only a prefix is printed, so only a prefix is copied, whatever the input size.
-        value = str.__getitem__(value, slice(0, _SHOWN_LIMIT + 1))
-    try:
-        text = repr(value)
-    except Exception:
-        return f"a {type_name(value)} object"
-    return text if len(text) <= _SHOWN_LIMIT else text[:_SHOWN_LIMIT] + "..."
-
-
-def type_name(value: object) -> str:
-    """Return the name of the type of value, cut like :func:`shown`."""
-    name = str(type(value).__name__)
-    return name if len(name) <= _SHOWN_LIMIT else name[:_SHOWN_LIMIT] + "..."
 
 
 def text_argument(value: object, what: str) -> str:
-    """Return value as an exact ``str``, or raise TypeError naming ``what``."""
-    if not isinstance(value, str):
-        raise TypeError(f"{what} must be a str, got {type_name(value)}")
-    return str.__str__(value)
+    """Return value as an exact str, or raise TypeError without inspecting its contents."""
+    if not issubclass(type(value), str):
+        raise TypeError(f"{what} must be a str")
+    return str.__str__(cast(str, value))
