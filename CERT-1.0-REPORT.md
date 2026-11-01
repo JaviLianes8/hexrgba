@@ -155,7 +155,8 @@ Final sdist SHA-256: `5222b7ca7976f1ad327f5c26d042ed7735c5f1e41835d870a5770a734d
 ## QA round 1: findings and fixes
 
 Date: 2026-11-01. Reviewed head: `2d8e92f91948ad442117bdcf084959fdba35c862`.
-Fix commit: the commit titled `fix round one certification findings` containing this section.
+Fix commit: `60dd2f100f9700699c3f1cdc8ab15e8887085e48`
+(`fix round one certification findings`).
 All ten findings are accepted. Each lens initially reported FAIL; independent
 re-verification remains pending. Public names, signatures and color arithmetic are unchanged.
 
