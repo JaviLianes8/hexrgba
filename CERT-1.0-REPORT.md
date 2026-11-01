@@ -13,7 +13,7 @@ Progress:
 - [x] Mutation round (18)
 - [ ] Independent reviewer (16)
 - [ ] Five QA lenses (19)
-- [ ] PR handoff (17); merge and publication remain pending
+- [x] PR handoff: [#4](https://github.com/JaviLianes8/hexrgba/pull/4); merge and publication remain pending
 
 ## API and compatibility
 
@@ -44,7 +44,7 @@ An external consumer of the installed wheel also passes `mypy --strict`.
 | 14 | PASS | Wheel and sdist contents inspected, LICENSE present, no downloaded text |
 | 15 | PASS | Four gates exit 0 independently; full suite 353 passed |
 | 16 | Pending | Independent reviewer has not run |
-| 17 | Pending | PR handoff, followed later by merge and publication |
+| 17 | Ready | PR #4 from release/1.0.0 to main; merge and publication pending |
 | 18 | PASS | Fifteen deliberate bugs killed; table below |
 | 19 | Pending | No QA lens verdicts recorded |
 
