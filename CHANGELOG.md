@@ -55,6 +55,8 @@ All notable changes to this project are documented here. The format follows
   values despite `__str__` overrides, and private strict-hex and unnamed-color errors.
 - Root and subcommand help syntax, required operands, flags and supported choices,
   including successful output through both installed entry points with empty stderr.
+- Help's CSS conversion default, foreground/background blend roles and option arity
+  agree with executable examples through source and both installed entry points.
 
 ## [0.2.1] - 2026-10-13
 

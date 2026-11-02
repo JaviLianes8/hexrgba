@@ -24,3 +24,19 @@ def test_help_describes_supported_syntax(capsys: pytest.CaptureFixture[str], com
         main(args)
     out, err = capsys.readouterr()
     _HELP.assert_help(command, exc.value.code, out, err)
+
+
+@pytest.mark.parametrize(
+    "contract", ["assert_conversion_default", "assert_blend_roles", "assert_option_forms"]
+)
+def test_help_matches_behavior(capsys: pytest.CaptureFixture[str], contract: str) -> None:
+    def run(args: list[str]) -> tuple[int, str, str]:
+        try:
+            code = main(args)
+        except SystemExit as exc:
+            assert isinstance(exc.code, int)
+            code = exc.code
+        out, err = capsys.readouterr()
+        return code, out, err
+
+    getattr(_HELP, contract)(run)
