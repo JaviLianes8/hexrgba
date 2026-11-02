@@ -383,8 +383,8 @@ Evidence is retained under `scratch/hexrgba-cert/fix-r6/`: `full.log`,
 ## QA round 7: findings and fixes
 
 Date: 2026-11-02. Reviewed head: `771e33b1eeadbff796515e5df55dad819b8dbf4c`.
-Fix commit: `enforce complete root help contracts for certification round seven`
-(the commit introducing this section).
+Fix commit: `0df04d1dc69919f5ba55f6d579d29a47fa0415c8`
+(`enforce complete root help contracts for certification round seven`).
 All six findings are accepted. Independent re-verification remains pending.
 
 | Lens | Finding | Correction and verification |
