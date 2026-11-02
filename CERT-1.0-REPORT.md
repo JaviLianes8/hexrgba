@@ -347,7 +347,8 @@ No findings are disputed.
 ## QA round 6: findings and fixes
 
 Date: 2026-11-02. Reviewed head: `097a8e5b5c35e31683a1b8d75d1523e27917adbb`.
-Fix commit: `enforce root help input contract for certification round six`.
+Fix commit: `f1e733fb52f8c52a6068fd729ca1ccaff3632229`
+(`enforce root help input contract for certification round six`).
 E-R6-01 is accepted. Independent re-verification remains pending.
 
 | Lens | Finding | Correction and verification |
