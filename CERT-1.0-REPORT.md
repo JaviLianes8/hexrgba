@@ -431,7 +431,49 @@ Evidence is retained under `scratch/hexrgba-cert/fix-r7/`: `full.log`,
 `mutation-results.json`, and each mutation's `Mxx-before.log`, `Mxx-source.log`,
 `Mxx-build.log`, `Mxx-console.json` and `Mxx-module.json`. No findings are disputed.
 
+## QA round 8: findings and fixes
+
+Date: 2026-11-03. Reviewed head: `618627a94b4cca1044468bb4a4771489955a5796`.
+Fix commit: `enforce root usage and exit-code contracts for round eight`.
+All three findings are accepted. Independent re-verification remains pending.
+
+| Lens | Finding | Correction and verification |
+| --- | --- | --- |
+| e | E-R8-01 | The complete normalized root usage requires the command group without optional brackets. An empty invocation must exit 2 with an error on stderr and no stdout. |
+| e | E-R8-02 | The complete root operand sequence excludes invented operands. Minimal invocations of all four commands succeed without a FILE operand and retain their expected output. |
+| e | E-R8-03 | The complete exit-code summary is pinned to 0 for success, 1 for a failed contrast level, and 2 for bad usage or invalid color. Successful commands, passing and failing AA pairs, empty invocation and an invalid color exercise those promises. |
+
+These findings concern missing contracts for correctly implemented behavior. Runtime
+code, public API and help text remain unchanged. Three new regression cases first
+failed against the original checker because it accepted each false help promise.
+All nine root-help cases pass after strengthening the shared source and wheel checker.
+The complete usage and exit-code expectations tolerate whitespace and line wrapping.
+CHANGELOG records the added verification.
+
+Each exact reviewer patch was applied alone in a separate scratch copy. The eleven
+general source help checks still pass for each patch. All six strengthened root-help
+behavior cases reject each patch with assertions. Fresh wheels were built and
+installed outside the repository; both installed entry points reject all three
+mutations while normalization still succeeds with its expected output.
+
+| Mutation | Source test detecting it | Installed console and isolated module |
+| --- | --- | --- |
+| N08: advertise an optional command | `test_root_help_matches_behavior[normalize]` | Both reject the complete usage |
+| N09: invent a required FILE operand | `test_root_help_matches_behavior[normalize]` | Both reject the complete usage |
+| N10: advertise success exit code 3 | `test_root_help_matches_behavior[normalize]` | Both reject the exit-code summary |
+
+`ruff format --check .`, `ruff check .`, `mypy --strict src` and
+`mypy --strict src tests` each exit 0. The full suite passes **476 tests, no skips**
+in 225.48 seconds, including doctests, fetched specifications, reference checks,
+wheel/CLI e2e and upgrade from PyPI 0.2.1. Every test has a 300-second timeout.
+This round ran locally on CPython 3.14.6; the preparation interpreter matrix above
+is historical.
+
+Evidence is retained under `scratch/hexrgba-cert/fix-r8/`: `red.log`, `full.log`,
+`mutation-results.json`, and each mutation's `Nxx-before.log`, `Nxx-source.log`,
+`Nxx-build.log`, `Nxx-console.json` and `Nxx-module.json`. No findings are disputed.
+
 ## Remaining stages
 
-Preparation checks and the round 1, 2, 3, 4, 5, 6 and 7 fixes are complete. The independent review and
+Preparation checks and the round 1, 2, 3, 4, 5, 6, 7 and 8 fixes are complete. The independent review and
 five-lens re-verification remain pending. Merge and publication remain pending.

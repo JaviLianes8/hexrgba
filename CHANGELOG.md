@@ -65,6 +65,9 @@ All notable changes to this project are documented here. The format follows
   match lowercase normalization, default CSS conversion, ratio output, compositing
   order, named-color support and package-version output through source
   and both installed entry points.
+- Complete root usage requires a command and no extra operands; the exit-code
+  summary matches successful commands, failed contrast levels and invalid input
+  through source and both installed entry points.
 
 ## [0.2.1] - 2026-10-13
 
