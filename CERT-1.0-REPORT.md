@@ -46,7 +46,7 @@ An external consumer of the installed wheel also passes `mypy --strict`.
 | 16 | Pending | Independent reviewer has not run |
 | 17 | Ready | PR #4 from release/1.0.0 to main; merge and publication pending |
 | 18 | PASS | Fifteen deliberate bugs killed; table below |
-| 19 | Pending | Round 4: E-R4-01, E-R4-02 and E-R4-03 help contracts fixed below; independent re-verification remains pending |
+| 19 | Pending | Round 5: E-R5-01, E-R5-02 and E-R5-03 help contracts fixed below; independent re-verification remains pending |
 
 ## Ground truth
 
@@ -306,7 +306,44 @@ Evidence is retained under `scratch/hexrgba-cert/fix-r4/`: `full.log`,
 `mutation-results.json`, and the individual `N04.log`, `N05.log`, `N06.log` files.
 No findings are disputed.
 
+## QA round 5: findings and fixes
+
+Date: 2026-11-02. Reviewed head: `6c37c6bf15d3eea5e8f4690ec1aa3c2f3ef666be`.
+Fix commit: `enforce cli input help contracts for certification round five`.
+All three findings are accepted. Independent re-verification remains pending.
+
+| Lens | Finding | Correction and verification |
+| --- | --- | --- |
+| e | E-R5-01 | Help promises lossless shortening only. RGB and RGBA pairs cover compressible channels, non-compressible RGB and non-compressible alpha, requiring exact output without rounding. |
+| e | E-R5-02 | Normalize and convert help promise strict CSS grammar. Both commands reject bare hex of all four supported lengths and whitespace-wrapped hex in strict mode, accept hash-prefixed CSS hex, and accept the lenient forms without strict mode. |
+| e | E-R5-03 | Both color operand descriptions promise hex and CSS named colors. Exact output checks cover hex, mixed-case RebeccaPurple and transparent, with and without strict mode. |
+
+These findings concern missing contracts for correctly implemented behavior. All eleven
+source help cases pass against the reviewed implementation. Runtime code, public API
+and help text remain unchanged. Hand-written expectations connect the documented
+semantics to executable examples through source and both installed entry points.
+CHANGELOG records the added verification.
+
+Each exact reviewer patch was applied alone in a scratch copy. Source contracts and
+a freshly built and installed wheel reject all three with assertion failures.
+
+| Mutation | Source test detecting it | Installed wheel result |
+| --- | --- | --- |
+| N08: promise lossy shortening | `test_help_matches_behavior[assert_lossless_shortening]` | Help contract fails |
+| N09: promise bare hex in strict mode | `test_help_matches_behavior[assert_strict_inputs]` | Help contract fails |
+| N10: deny named-color support | `test_help_matches_behavior[assert_named_inputs]` | Help contract fails |
+
+`ruff format --check .`, `ruff check .`, `mypy --strict src` and
+`mypy --strict src tests` each exit 0. The full suite passes **467 tests, no skips**,
+including doctests, fetched specifications, reference implementations, wheel/CLI e2e
+and upgrade from PyPI 0.2.1. Every test has a 300-second timeout. This round ran
+locally on CPython 3.14.6; the preparation interpreter matrix above is historical.
+
+Evidence is retained under `scratch/hexrgba-cert/fix-r5/`: `full.log`,
+`mutation-results.json`, and the individual `N08.log`, `N09.log`, `N10.log` files.
+No findings are disputed.
+
 ## Remaining stages
 
-Preparation checks and the round 1, 2, 3 and 4 fixes are complete. The independent review and
+Preparation checks and the round 1, 2, 3, 4 and 5 fixes are complete. The independent review and
 five-lens re-verification remain pending. Merge and publication remain pending.

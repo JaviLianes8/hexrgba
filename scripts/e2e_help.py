@@ -71,6 +71,14 @@ def assert_help(command: str, code: int, out: str, err: str) -> None:
             assert re.search(r"(?m)^\s+" + name + r"\s+\S", syntax), (name, syntax)
     if command == "convert":
         assert re.search(r"--to\s+\{[^}]+\}\s+output \(default css\)", syntax), syntax
+    if command in ("normalize", "convert"):
+        for label, description in (
+            ("color", "hex color or CSS named color"),
+            ("--strict", "follow the CSS grammar exactly"),
+        ):
+            assert re.search(r"(?m)^\s+" + label + r"\s+" + description + r"\s*$", syntax), syntax
+    if command == "normalize":
+        assert re.search(r"(?m)^\s+--short\s+use #rgb / #rgba when lossless\s*$", syntax), syntax
     if command == "blend":
         for operand, role in (
             ("foreground", "color on top (usually translucent)"),
@@ -129,6 +137,46 @@ def assert_option_forms(run: Run) -> None:
         assert code == 2 and out == "" and "error:" in err, args
 
 
+def assert_lossless_shortening(run: Run) -> None:
+    """Short output preserves every channel, including alpha, without rounding."""
+    assert_help("normalize", *run(["normalize", "--help"]))
+    for color, expected in (
+        ("#aabbcc", "#abc"),
+        ("#aabbccdd", "#abcd"),
+        ("#123456", "#123456"),
+        ("#aabbcc80", "#aabbcc80"),
+    ):
+        assert run(["normalize", color, "--short"]) == (0, expected + "\n", "")
+
+
+def assert_strict_inputs(run: Run) -> None:
+    """Strict CSS hex requires a hash and rejects surrounding whitespace."""
+    for command in ("normalize", "convert"):
+        assert_help(command, *run([command, "--help"]))
+        options = ["--to", "hex"] if command == "convert" else []
+        for color in ("abc", "abcd", "aabbcc", "aabbccdd", " #aabbcc "):
+            code, out, err = run([command, color, *options, "--strict"])
+            assert code == 2 and out == "" and "error:" in err, (command, color)
+            valid = color.strip() if color.startswith(" ") else "#" + color
+            expected = run([command, valid, *options, "--strict"])
+            assert expected[0] == 0 and expected[2] == "", (command, valid, expected)
+            assert run([command, color, *options]) == expected
+
+
+def assert_named_inputs(run: Run) -> None:
+    """Hex and named colors work in both commands, including strict mode."""
+    for command in ("normalize", "convert"):
+        assert_help(command, *run([command, "--help"]))
+        options = ["--to", "hex"] if command == "convert" else []
+        for color, expected in (
+            ("#663399", "#663399"),
+            ("RebeccaPurple", "#663399"),
+            ("transparent", "#00000000"),
+        ):
+            for strict in ([], ["--strict"]):
+                assert run([command, color, *options, *strict]) == (0, expected + "\n", "")
+
+
 def check_help(python: str, tool: str, work: Path, env: dict[str, str]) -> None:
     for entry in ([tool], [python, "-I", "-m", "hexrgba"]):
 
@@ -147,3 +195,6 @@ def check_help(python: str, tool: str, work: Path, env: dict[str, str]) -> None:
         assert_conversion_default(run)
         assert_blend_roles(run)
         assert_option_forms(run)
+        assert_lossless_shortening(run)
+        assert_strict_inputs(run)
+        assert_named_inputs(run)

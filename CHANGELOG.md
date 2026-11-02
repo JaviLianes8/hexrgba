@@ -57,6 +57,8 @@ All notable changes to this project are documented here. The format follows
   including successful output through both installed entry points with empty stderr.
 - Help's CSS conversion default, foreground/background blend roles and option arity
   agree with executable examples through source and both installed entry points.
+- Help's lossless shortening, strict CSS syntax and named-color support agree with
+  accepted and rejected inputs through source and both installed entry points.
 
 ## [0.2.1] - 2026-10-13
 

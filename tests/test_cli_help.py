@@ -27,7 +27,15 @@ def test_help_describes_supported_syntax(capsys: pytest.CaptureFixture[str], com
 
 
 @pytest.mark.parametrize(
-    "contract", ["assert_conversion_default", "assert_blend_roles", "assert_option_forms"]
+    "contract",
+    [
+        "assert_conversion_default",
+        "assert_blend_roles",
+        "assert_option_forms",
+        "assert_lossless_shortening",
+        "assert_strict_inputs",
+        "assert_named_inputs",
+    ],
 )
 def test_help_matches_behavior(capsys: pytest.CaptureFixture[str], contract: str) -> None:
     def run(args: list[str]) -> tuple[int, str, str]:
