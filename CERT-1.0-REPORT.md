@@ -434,7 +434,8 @@ Evidence is retained under `scratch/hexrgba-cert/fix-r7/`: `full.log`,
 ## QA round 8: findings and fixes
 
 Date: 2026-11-03. Reviewed head: `618627a94b4cca1044468bb4a4771489955a5796`.
-Fix commit: `enforce root usage and exit-code contracts for round eight`.
+Fix commit: `9c8d84ce653c2627cb1f63fd8feedc5274482461`
+(`enforce root usage and exit-code contracts for round eight`).
 All three findings are accepted. Independent re-verification remains pending.
 
 | Lens | Finding | Correction and verification |
