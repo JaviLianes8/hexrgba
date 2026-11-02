@@ -196,7 +196,8 @@ No findings are disputed.
 ## QA round 2: findings and fixes
 
 Date: 2026-11-02. Reviewed head: `3080a6fde0a65b9141e3db5a4710ffa4f913e5a4`.
-Fix commit: `fix round two certification findings` (the commit adding this section).
+Fix commit: `675e1a81e571753a71a50b34367d7ae9bb735e32`
+(`fix round two certification findings`).
 All six findings are accepted. Independent re-verification remains pending.
 Public names, signatures and color arithmetic are unchanged.
 
