@@ -56,10 +56,7 @@ def assert_help(command: str, code: int, out: str, err: str) -> None:
         for group in re.findall(r"\{([^}]+)\}", syntax)
     ]
     if command in _CHOICES:
-        assert choices and all(group == _CHOICES[command] for group in choices), (
-            command,
-            choices,
-        )
+        assert choices and all(group == _CHOICES[command] for group in choices), (command, choices)
         assert "{" in usage, usage
     else:
         assert not choices, (command, choices)
@@ -67,6 +64,8 @@ def assert_help(command: str, code: int, out: str, err: str) -> None:
         for operand in _OPERANDS[command].split():
             assert re.search(r"(?m)^\s+" + operand + r"\s+\S", syntax), (operand, syntax)
     if not command:
+        description = " ".join(syntax.split("\n\n")[1].split())
+        assert description == "Normalize, convert, compare and blend CSS hex and named colors.", out
         for name in COMMANDS[1:]:
             assert re.search(r"(?m)^\s+" + name + r"\s+\S", syntax), (name, syntax)
     if command == "convert":
@@ -84,9 +83,8 @@ def assert_help(command: str, code: int, out: str, err: str) -> None:
             ("foreground", "color on top (usually translucent)"),
             ("background", "color underneath"),
         ):
-            assert re.search(r"(?m)^\s+" + operand + r"\s+" + re.escape(role) + r"\s*$", syntax), (
-                syntax
-            )
+            pattern = r"(?m)^\s+" + operand + r"\s+" + re.escape(role) + r"\s*$"
+            assert re.search(pattern, syntax), syntax
 
 
 def assert_conversion_default(run: Run) -> None:
@@ -164,12 +162,14 @@ def assert_strict_inputs(run: Run) -> None:
 
 
 def assert_named_inputs(run: Run) -> None:
-    """Hex and named colors work in both commands, including strict mode."""
+    """Root and operand help promise hex and names that work in both modes."""
+    assert_help("", *run(["--help"]))
     for command in ("normalize", "convert"):
         assert_help(command, *run([command, "--help"]))
         options = ["--to", "hex"] if command == "convert" else []
         for color, expected in (
             ("#663399", "#663399"),
+            ("rebeccapurple", "#663399"),
             ("RebeccaPurple", "#663399"),
             ("transparent", "#00000000"),
         ):

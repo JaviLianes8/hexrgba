@@ -59,6 +59,8 @@ All notable changes to this project are documented here. The format follows
   agree with executable examples through source and both installed entry points.
 - Help's lossless shortening, strict CSS syntax and named-color support agree with
   accepted and rejected inputs through source and both installed entry points.
+- Root help's hex and named-color capabilities match executable input examples
+  through source and both installed entry points.
 
 ## [0.2.1] - 2026-10-13
 

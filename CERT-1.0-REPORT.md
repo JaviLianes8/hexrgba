@@ -344,7 +344,42 @@ Evidence is retained under `scratch/hexrgba-cert/fix-r5/`: `full.log`,
 `mutation-results.json`, and the individual `N08.log`, `N09.log`, `N10.log` files.
 No findings are disputed.
 
+## QA round 6: findings and fixes
+
+Date: 2026-11-02. Reviewed head: `097a8e5b5c35e31683a1b8d75d1523e27917adbb`.
+Fix commit: `enforce root help input contract for certification round six`.
+E-R6-01 is accepted. Independent re-verification remains pending.
+
+| Lens | Finding | Correction and verification |
+| --- | --- | --- |
+| e | E-R6-01 | Root help must advertise CSS hex and named colors. The shared named-input contract checks this description before exercising hex, lowercase and mixed-case rebeccapurple, and transparent through normalize and convert, with and without strict mode. Source and both installed entry points use the same assertions. |
+
+This finding concerns missing regression coverage for correctly implemented behavior.
+All eleven source help cases pass against the reviewed implementation. Runtime code,
+public API and help text remain unchanged. Hand-written expectations pin the root
+description independently of parser internals and tolerate line wrapping. CHANGELOG
+records the added verification.
+
+The exact round-six `N10.patch` was applied in a scratch copy. Three source assertions
+reject the false root description: `test_help_describes_supported_syntax` for root
+help, `test_help_matches_behavior[assert_option_forms]`, and
+`test_help_matches_behavior[assert_named_inputs]`. A fresh mutant wheel was built and
+installed outside the repository. The shared named-input contract independently fails
+for both the console script and isolated module entry point; both still normalize
+`rebeccapurple` to `#663399`, confirming the help contradiction.
+
+`ruff format --check .`, `ruff check .`, `mypy --strict src` and
+`mypy --strict src tests` each exit 0. The full suite passes **467 tests, no skips**
+in 149.23 seconds, including doctests, fetched specifications, reference checks,
+wheel/CLI e2e and upgrade from PyPI 0.2.1. Every test has a 300-second timeout.
+This round ran locally on CPython 3.14.6; the preparation interpreter matrix above
+is historical.
+
+Evidence is retained under `scratch/hexrgba-cert/fix-r6/`: `full.log`,
+`mutation-results.json`, `N10-source.log`, `N10-build.log`, `N10-console.log`, and
+`N10-module.log`. No findings are disputed.
+
 ## Remaining stages
 
-Preparation checks and the round 1, 2, 3, 4 and 5 fixes are complete. The independent review and
+Preparation checks and the round 1, 2, 3, 4, 5 and 6 fixes are complete. The independent review and
 five-lens re-verification remain pending. Merge and publication remain pending.
