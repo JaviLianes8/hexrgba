@@ -35,6 +35,8 @@ All notable changes to this project are documented here. The format follows
   the base `Color`. Predicates are typed to accept `object` to match their runtime use.
 - CLI usage errors omit argument contents and point to `--help` for syntax and choices.
   A closed output exits 1 without a traceback, including `--help` and `--version`.
+- Unbuffered help and version output also exits 1 quietly on a closed pipe, including
+  every subcommand's help through the module and installed console entry points.
 
 ### Clarified
 
@@ -49,6 +51,8 @@ All notable changes to this project are documented here. The format follows
   seeded fuzz, wheel/CLI installation and upgrade, and mutation-tested contracts.
 - Exact explicit opaque-alpha formatting, strict parsing through `Color` subclasses,
   alpha-independent luminance, and diagnostics at the former preview boundaries.
+- Fresh base `Color` results for opaque and transparent blends, underlying string
+  values despite `__str__` overrides, and private strict-hex and unnamed-color errors.
 
 ## [0.2.1] - 2026-10-13
 

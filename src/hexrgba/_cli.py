@@ -8,13 +8,16 @@ import io
 import math
 import sys
 from collections.abc import Sequence
-from typing import NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
 from . import __version__
 from ._blend import blend
 from ._color import Color, parse_color
 from ._errors import ColorError
 from ._wcag import contrast_ratio, passes_contrast
+
+if TYPE_CHECKING:
+    from _typeshed import SupportsWrite
 
 _EXAMPLES = """exit codes: 0 success, 1 the pair fails --level, 2 bad usage or invalid color
 
@@ -46,6 +49,11 @@ class _Parser(argparse.ArgumentParser):
 
     def error(self, message: str) -> NoReturn:
         super().error("invalid command or arguments; use --help for syntax and choices")
+
+    def _print_message(self, message: str, file: SupportsWrite[str] | None = None) -> None:
+        # argparse suppresses write errors; main must handle them even without buffering.
+        if message:
+            (file if file is not None else sys.stderr).write(message)
 
 
 def _build_parser() -> argparse.ArgumentParser:

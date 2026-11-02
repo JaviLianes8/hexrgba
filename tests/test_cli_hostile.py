@@ -48,14 +48,20 @@ def test_a_huge_color_gives_a_short_error_in_every_command(
 
 @pytest.mark.parametrize(
     "args",
-    [["convert", "red"], ["--help"], ["--version"], ["normalize", "--help"]],
+    [
+        ["convert", "red"],
+        ["--help"],
+        ["--version"],
+        *[[command, "--help"] for command in ("normalize", "convert", "contrast", "blend")],
+    ],
 )
-def test_a_closed_output_exits_1_quietly(args: list[str]) -> None:
+@pytest.mark.parametrize("unbuffered", [False, True])
+def test_a_closed_output_exits_1_quietly(args: list[str], unbuffered: bool) -> None:
     read_end, write_end = os.pipe()
     os.close(read_end)
     try:
         done = subprocess.run(
-            [sys.executable, "-m", "hexrgba", *args],
+            [sys.executable, *(["-u"] if unbuffered else []), "-m", "hexrgba", *args],
             stdout=write_end,
             stderr=subprocess.PIPE,
             env={**os.environ, "PYTHONPATH": SRC},

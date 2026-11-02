@@ -46,7 +46,7 @@ An external consumer of the installed wheel also passes `mypy --strict`.
 | 16 | Pending | Independent reviewer has not run |
 | 17 | Ready | PR #4 from release/1.0.0 to main; merge and publication pending |
 | 18 | PASS | Fifteen deliberate bugs killed; table below |
-| 19 | Pending | Round 1: all five lenses reported findings; fixes below await re-review |
+| 19 | Pending | Round 2: six findings from lenses d/e fixed below; independent re-verification remains pending |
 
 ## Ground truth
 
@@ -193,7 +193,43 @@ Evidence is retained under `scratch/hexrgba-cert/fix-r1/`: `baseline.log`, `full
 `mutation-results.json`, `installed-closed-pipe.json` and the individual mutation logs.
 No findings are disputed.
 
+## QA round 2: findings and fixes
+
+Date: 2026-11-02. Reviewed head: `3080a6fde0a65b9141e3db5a4710ffa4f913e5a4`.
+Fix commit: `fix round two certification findings` (the commit adding this section).
+All six findings are accepted. Independent re-verification remains pending.
+Public names, signatures and color arithmetic are unchanged.
+
+| Lens | Finding | Correction and verification |
+| --- | --- | --- |
+| d | D-02 | The argument parser propagates output-write errors to the protected handler. Buffered and unbuffered closed-pipe tests cover normal output, help, version and all four subcommands; installed console and isolated module entry points return 1 with empty stderr. |
+| e | E-R2-01 | Opaque foreground contracts require a distinct base `Color` with the foreground channels, for both `Color` and subclasses. N06 now fails both cases. |
+| e | E-R2-02 | Transparent foreground contracts require a distinct base `Color` with the background channels, for base/subclass backgrounds at alpha 1, 128 and 255. N07 now fails all six cases. |
+| e | E-R2-03 | Parsing uses underlying strings even when `__str__` returns another valid color or raises. `parse_color`, base/subclass `Color.parse` and contrast levels are covered. N09 now fails eight cases. |
+| e | E-R2-04 | Strict hashless-hex rejection has the same exact private diagnostic for all four hex lengths through `parse_color` and base/subclass `Color.parse`. N17 now fails twelve cases. |
+| e | E-R2-05 | Unnamed-color CLI conversion requires exit 2, empty stdout and an exact diagnostic that omits each supplied color. N23 now fails three cases. |
+
+The regression tests preceded the implementation fix. Against the reviewed code,
+the targeted run had **7 failures and 48 passes**: six unbuffered module help/version
+cases and the installed-console check failed. The five lens-e findings are missing
+contracts for behavior already implemented correctly; no implementation changes were
+needed for them. Each reported mutation was replayed alone in a scratch copy and
+exited 1 because of the new assertions, with no collection or syntax failures.
+
+`ruff format --check .`, `ruff check .`, `mypy --strict src` and
+`mypy --strict src tests` each exit 0. The full suite passes **456 tests, no skips**,
+including doctests, fetched specifications, reference implementations, wheel/CLI e2e
+and upgrade from PyPI 0.2.1. The installed e2e check exercises 28 combinations of
+entry point, buffering and output command. Every test has a 300-second timeout.
+The original D-02 reproduction also passes against a fresh installation built from
+the sdist. This round ran locally on CPython 3.14.6; the preparation interpreter
+matrix above is historical. The behavior change is recorded in CHANGELOG.
+
+Evidence is retained under `scratch/hexrgba-cert/fix-r2/`: `baseline.log`, `full.log`,
+`mutation-results.json`, individual mutation logs, and `sdist-repro.log`.
+No findings are disputed.
+
 ## Remaining stages
 
-Preparation checks and the round 1 fixes are complete. The independent review and
+Preparation checks and the round 1 and 2 fixes are complete. The independent review and
 five-lens re-verification remain pending. Merge and publication remain pending.

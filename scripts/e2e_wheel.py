@@ -48,6 +48,8 @@ def help_examples(help_text: str) -> list[tuple[list[str], int, str]]:
 
 
 def main() -> int:
+    from e2e_output import check_closed_output
+
     with tempfile.TemporaryDirectory(prefix="hexrgba-e2e-") as raw:
         work = Path(raw)
         dist = work / "dist"
@@ -120,6 +122,7 @@ def main() -> int:
         check("wheel installs", code == 0, err[-2000:])
         tool = str(bindir / "hexrgba")
         env = {"PATH": os.environ.get("PATH", ""), "SYSTEMROOT": os.environ.get("SYSTEMROOT", "")}
+        check_closed_output(python, tool, work, env)
 
         code, out, _ = run([tool, "--version"], cwd=work, env=env)
         check("--version", code == 0 and out.strip() == "hexrgba 1.0.0", out)
