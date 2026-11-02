@@ -309,7 +309,8 @@ No findings are disputed.
 ## QA round 5: findings and fixes
 
 Date: 2026-11-02. Reviewed head: `6c37c6bf15d3eea5e8f4690ec1aa3c2f3ef666be`.
-Fix commit: `enforce cli input help contracts for certification round five`.
+Fix commit: `bda739e4bc25d64771fc50775fa3c8f89219b2e0`
+(`enforce cli input help contracts for certification round five`).
 All three findings are accepted. Independent re-verification remains pending.
 
 | Lens | Finding | Correction and verification |
