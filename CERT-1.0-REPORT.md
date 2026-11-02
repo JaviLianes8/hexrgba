@@ -233,7 +233,8 @@ No findings are disputed.
 ## QA round 3: findings and fixes
 
 Date: 2026-11-02. Reviewed head: `94a0dde469eb1e653c1fec42f627dab2c34c25d8`.
-Fix commit: `enforce cli help contracts for certification round three`.
+Fix commit: `87ff2bbea524cd230bc40bb4a2f85b8c6ad891a4`
+(`enforce cli help contracts for certification round three`).
 E-R3-01 is accepted. Independent re-verification remains pending.
 
 | Lens | Finding | Correction and verification |
