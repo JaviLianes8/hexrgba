@@ -61,6 +61,10 @@ All notable changes to this project are documented here. The format follows
   accepted and rejected inputs through source and both installed entry points.
 - Root help's hex and named-color capabilities match executable input examples
   through source and both installed entry points.
+- Complete root help descriptions, command summaries and version-option wording
+  match lowercase normalization, default CSS conversion, ratio output, compositing
+  order, named-color support and package-version output through source
+  and both installed entry points.
 
 ## [0.2.1] - 2026-10-13
 

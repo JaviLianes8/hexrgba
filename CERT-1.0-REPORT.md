@@ -380,7 +380,58 @@ Evidence is retained under `scratch/hexrgba-cert/fix-r6/`: `full.log`,
 `mutation-results.json`, `N10-source.log`, `N10-build.log`, `N10-console.log`, and
 `N10-module.log`. No findings are disputed.
 
+## QA round 7: findings and fixes
+
+Date: 2026-11-02. Reviewed head: `771e33b1eeadbff796515e5df55dad819b8dbf4c`.
+Fix commit: `enforce complete root help contracts for certification round seven`
+(the commit introducing this section).
+All six findings are accepted. Independent re-verification remains pending.
+
+| Lens | Finding | Correction and verification |
+| --- | --- | --- |
+| e | E-R7-01 | The root normalize summary promises lowercase hex; mixed-case `#AaBBcC` must normalize to `#aabbcc`. |
+| e | E-R7-02 | The root convert summary is pinned alongside an invocation without `--to`; `convert red` must emit `rgb(255, 0, 0)`. |
+| e | E-R7-03 | The root contrast summary promises a WCAG ratio; black against white must emit `21.00:1`. |
+| e | E-R7-04 | The root blend summary promises a color over its background; translucent blue over red must emit `#7f0080`, while reversed operands must emit `#ff0000`. |
+| e | E-R7-05 | The complete root help body is checked, including every description paragraph. Named-color support is exercised by normalizing `rebeccapurple` to `#663399`. |
+| e | E-R7-06 | The version option promises the program's version; `--version` must emit `hexrgba 1.0.0`. |
+
+These findings concern missing contracts for correctly implemented behavior. The six
+new source cases pass against the reviewed implementation. Runtime code, public API
+and help text remain unchanged. The hand-written complete-body expectation tolerates
+line wrapping, indentation and argparse's options-heading variants. It rejects added
+or changed prose anywhere before the separately checked exit-code and example epilog.
+Each promise is paired with executable output checks shared by source tests and both
+installed entry points. The new helper is included in the sdist. CHANGELOG records
+the added verification.
+
+Each exact reviewer patch was applied alone in a separate scratch copy. All eleven
+previous source help checks pass for each patch, reproducing the coverage gap. All
+six new source cases then fail with assertions, without collection, syntax or timeout
+errors. Fresh wheels were built and installed outside the repository for every patch.
+Both entry points reject the false help while retaining the expected command output.
+
+| Mutation | Source test detecting it | Installed console and isolated module |
+| --- | --- | --- |
+| M05: promise uppercase normalization | `test_root_help_matches_behavior[normalize]` | Both reject the help |
+| M06: advertise default hex conversion | `test_root_help_matches_behavior[convert]` | Both reject the help |
+| M07: promise percentage contrast | `test_root_help_matches_behavior[contrast]` | Both reject the help |
+| M08: reverse compositing order | `test_root_help_matches_behavior[blend]` | Both reject the help |
+| M09: add a paragraph denying names | `test_root_help_matches_behavior[description]` | Both reject the help |
+| M10: describe the Python runtime version | `test_root_help_matches_behavior[version]` | Both reject the help |
+
+`ruff format --check .`, `ruff check .`, `mypy --strict src` and
+`mypy --strict src tests` each exit 0. The full suite passes **473 tests, no skips**
+in 160.50 seconds, including doctests, fetched specifications, reference checks,
+wheel/CLI e2e and upgrade from PyPI 0.2.1. Every test has a 300-second timeout.
+This round ran locally on CPython 3.14.6; the preparation interpreter matrix above
+is historical.
+
+Evidence is retained under `scratch/hexrgba-cert/fix-r7/`: `full.log`,
+`mutation-results.json`, and each mutation's `Mxx-before.log`, `Mxx-source.log`,
+`Mxx-build.log`, `Mxx-console.json` and `Mxx-module.json`. No findings are disputed.
+
 ## Remaining stages
 
-Preparation checks and the round 1, 2, 3, 4, 5 and 6 fixes are complete. The independent review and
+Preparation checks and the round 1, 2, 3, 4, 5, 6 and 7 fixes are complete. The independent review and
 five-lens re-verification remain pending. Merge and publication remain pending.
