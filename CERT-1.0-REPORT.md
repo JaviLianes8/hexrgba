@@ -46,7 +46,7 @@ An external consumer of the installed wheel also passes `mypy --strict`.
 | 16 | Pending | Independent reviewer has not run |
 | 17 | Ready | PR #4 from release/1.0.0 to main; merge and publication pending |
 | 18 | PASS | Fifteen deliberate bugs killed; table below |
-| 19 | Pending | Round 3: E-R3-01 help contracts fixed below; independent re-verification remains pending |
+| 19 | Pending | Round 4: E-R4-01, E-R4-02 and E-R4-03 help contracts fixed below; independent re-verification remains pending |
 
 ## Ground truth
 
@@ -268,7 +268,45 @@ Evidence is retained under `scratch/hexrgba-cert/fix-r3/`: `full.log`,
 `mutation-results.json`, and the individual `S17.log`, `S19.log`, `S20.log` files.
 No findings are disputed.
 
+## QA round 4: findings and fixes
+
+Date: 2026-11-02. Reviewed head: `c05090373d5c46dba98f813725c4211ed7edf5ae`.
+Fix commit: `fe840ecc104db8882f2773bc0c0186e55b9ff2c5`
+(`enforce cli help semantics for certification round four`).
+All three findings are accepted. Independent re-verification remains pending.
+
+| Lens | Finding | Correction and verification |
+| --- | --- | --- |
+| e | E-R4-01 | Help independently promises CSS as the conversion default. Omitting `--to` and selecting the advertised default both produce `rgb(255, 0, 0)` for red. |
+| e | E-R4-02 | Help pins foreground as the color on top and background as the color underneath. Translucent blue over red produces `#7f0080`; reversing the operands produces `#ff0000`. |
+| e | E-R4-03 | Usage and option declarations pin boolean flags without values and choice options with values. Executable cases cover `--short`, both `--strict` forms, `--large`, every `--to` and `--level` choice, rejected extra values and rejected missing values. |
+
+These findings are missing contracts for correctly implemented behavior. The eight
+source help cases pass against the reviewed implementation. Runtime code, public API
+and help text remain unchanged. The expectations are hand-written, independent of
+parser internals, and shared with both installed console and isolated module checks.
+CHANGELOG records the added verification.
+
+Each exact reviewer patch was applied alone in a scratch copy. The source contracts
+and a freshly built and installed wheel reject all three with assertion failures.
+
+| Mutation | Source test detecting it | Installed wheel result |
+| --- | --- | --- |
+| N04: advertise hex as the conversion default | `test_help_matches_behavior[assert_conversion_default]` | Help contract fails |
+| N05: swap foreground/background descriptions | `test_help_matches_behavior[assert_blend_roles]` | Help contract fails |
+| N06: advertise `--short LENGTH` | `test_help_matches_behavior[assert_option_forms]` | Help contract fails |
+
+`ruff format --check .`, `ruff check .`, `mypy --strict src` and
+`mypy --strict src tests` each exit 0. The full suite passes **464 tests, no skips**,
+including doctests, fetched specifications, reference implementations, wheel/CLI e2e
+and upgrade from PyPI 0.2.1. Every test has a 300-second timeout. This round ran
+locally on CPython 3.14.6; the preparation interpreter matrix above is historical.
+
+Evidence is retained under `scratch/hexrgba-cert/fix-r4/`: `full.log`,
+`mutation-results.json`, and the individual `N04.log`, `N05.log`, `N06.log` files.
+No findings are disputed.
+
 ## Remaining stages
 
-Preparation checks and the round 1, 2 and 3 fixes are complete. The independent review and
+Preparation checks and the round 1, 2, 3 and 4 fixes are complete. The independent review and
 five-lens re-verification remain pending. Merge and publication remain pending.
