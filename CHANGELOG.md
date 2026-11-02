@@ -53,6 +53,8 @@ All notable changes to this project are documented here. The format follows
   alpha-independent luminance, and diagnostics at the former preview boundaries.
 - Fresh base `Color` results for opaque and transparent blends, underlying string
   values despite `__str__` overrides, and private strict-hex and unnamed-color errors.
+- Root and subcommand help syntax, required operands, flags and supported choices,
+  including successful output through both installed entry points with empty stderr.
 
 ## [0.2.1] - 2026-10-13
 

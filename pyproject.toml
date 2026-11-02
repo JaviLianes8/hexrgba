@@ -51,6 +51,7 @@ include = [
     "scripts/fetch_upstream.py",
     "scripts/e2e_wheel.py",
     "scripts/e2e_output.py",
+    "scripts/e2e_help.py",
     "scripts/upgrade_probe.py",
     "CHANGELOG.md",
     "GUIDE.md",

@@ -46,7 +46,7 @@ An external consumer of the installed wheel also passes `mypy --strict`.
 | 16 | Pending | Independent reviewer has not run |
 | 17 | Ready | PR #4 from release/1.0.0 to main; merge and publication pending |
 | 18 | PASS | Fifteen deliberate bugs killed; table below |
-| 19 | Pending | Round 2: six findings from lenses d/e fixed below; independent re-verification remains pending |
+| 19 | Pending | Round 3: E-R3-01 help contracts fixed below; independent re-verification remains pending |
 
 ## Ground truth
 
@@ -230,7 +230,44 @@ Evidence is retained under `scratch/hexrgba-cert/fix-r2/`: `baseline.log`, `full
 `mutation-results.json`, individual mutation logs, and `sdist-repro.log`.
 No findings are disputed.
 
+## QA round 3: findings and fixes
+
+Date: 2026-11-02. Reviewed head: `94a0dde469eb1e653c1fec42f627dab2c34c25d8`.
+Fix commit: `enforce cli help contracts for certification round three`.
+E-R3-01 is accepted. Independent re-verification remains pending.
+
+| Lens | Finding | Correction and verification |
+| --- | --- | --- |
+| e | E-R3-01 | Root and all four subcommand help contracts require usage, required operands in order, documented operands and subcommands, flags, exact supported choice sets, exit 0 and empty stderr. The same assertions run against the installed console script and isolated module entry point. |
+
+This finding concerns missing contracts for behavior already implemented correctly.
+The five new source cases pass against the reviewed implementation; no runtime or
+API changes are needed. Expectations are hand-written, independent of parser internals,
+and tolerate line wrapping and argparse section headings. The shared help checker is
+included in the sdist so its packaged tests and wheel verification remain runnable.
+CHANGELOG records the added verification.
+
+Each reported mutation was applied alone in a scratch copy. Both the source contracts
+and a newly built and installed wheel reject every mutation with assertion failures.
+
+| Mutation | Source test detecting it | Installed wheel result |
+| --- | --- | --- |
+| S17: replace subcommand help with a placeholder | `test_help_describes_supported_syntax` for all four subcommands | Help contract fails |
+| S19: remove root syntax and options | `test_help_describes_supported_syntax` for root help | Help contract fails |
+| S20: advertise unsupported `lab` conversion | `test_help_describes_supported_syntax` for convert | Help contract fails |
+
+`ruff format --check .`, `ruff check .`, `mypy --strict src` and
+`mypy --strict src tests` each exit 0. The full suite passes **461 tests, no skips**,
+including doctests, fetched specifications, reference implementations, wheel/CLI e2e
+and upgrade from PyPI 0.2.1. Help checks cover ten installed entry point/command
+combinations. Every test has a 300-second timeout. This round ran locally on
+CPython 3.14.6; the preparation interpreter matrix above is historical.
+
+Evidence is retained under `scratch/hexrgba-cert/fix-r3/`: `full.log`,
+`mutation-results.json`, and the individual `S17.log`, `S19.log`, `S20.log` files.
+No findings are disputed.
+
 ## Remaining stages
 
-Preparation checks and the round 1 and 2 fixes are complete. The independent review and
+Preparation checks and the round 1, 2 and 3 fixes are complete. The independent review and
 five-lens re-verification remain pending. Merge and publication remain pending.
