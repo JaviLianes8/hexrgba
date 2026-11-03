@@ -68,6 +68,12 @@ All notable changes to this project are documented here. The format follows
 - Complete root usage requires a command and no extra operands; the exit-code
   summary matches successful commands, failed contrast levels and invalid input
   through source and both installed entry points.
+- Every root help example's complete result, including the threshold stated for a
+  failing contrast level, matches command output and the WCAG threshold applied.
+- The complete help text of every subcommand, including any description and epilog,
+  is pinned; contrast operand roles, the `--level` failure exit code and the
+  `--large` dependency on `--level` match translucent, failing and rejected
+  invocations through source and both installed entry points.
 
 ## [0.2.1] - 2026-10-13
 

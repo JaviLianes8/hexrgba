@@ -51,6 +51,7 @@ def main() -> int:
     from e2e_help import check_help
     from e2e_output import check_closed_output
     from e2e_root_help import check_root_help
+    from e2e_sub_help import check_sub_help
 
     with tempfile.TemporaryDirectory(prefix="hexrgba-e2e-") as raw:
         work = Path(raw)
@@ -127,6 +128,7 @@ def main() -> int:
         check_closed_output(python, tool, work, env)
         check_help(python, tool, work, env)
         check_root_help(python, tool, work, env)
+        check_sub_help(python, tool, work, env)
 
         code, out, _ = run([tool, "--version"], cwd=work, env=env)
         check("--version", code == 0 and out.strip() == "hexrgba 1.0.0", out)

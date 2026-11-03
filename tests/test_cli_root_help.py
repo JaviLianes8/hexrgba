@@ -45,8 +45,9 @@ def test_root_help_matches_behavior(
         ("{normalize,convert,contrast,blend} ...", "[{normalize,convert,contrast,blend}] ..."),
         ("{normalize,convert,contrast,blend} ...", "FILE {normalize,convert,contrast,blend} ..."),
         ("exit codes: 0 success", "exit codes: 3 success"),
+        ("4.47:1 is below 4.5:1", "4.47:1 is below 3:1"),
     ],
-    ids=["optional-command", "invented-file", "false-success-code"],
+    ids=["optional-command", "invented-file", "false-success-code", "false-example-threshold"],
 )
 def test_root_help_contract_rejects_false_promises(
     run_cli: Callable[[list[str]], tuple[int, str, str]], original: str, replacement: str
@@ -61,4 +62,4 @@ def test_root_help_contract_rejects_false_promises(
         return run_cli(args)
 
     with pytest.raises(AssertionError):
-        _HELP.assert_root_help(run, "normalize")
+        _HELP.assert_root_help(run, "examples")
