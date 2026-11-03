@@ -522,7 +522,40 @@ CPython 3.14.2; the preparation interpreter matrix above is historical.
 Evidence is retained under `scratch/hexrgba-cert/fix-r9/`: `red.log`, `full.log` and
 each mutation's `Pxx-source.log`. No findings are disputed.
 
+## Review round 1: findings and fixes
+
+Date: 2026-11-03. Reviewed head: `c93f35754300dedf6cf9bb66eb714d3298b89645`.
+Fix commit: `bf549eb1d8ecb591245d640fc7f433727bbc6dde`
+(`ship the subcommand help checker in the sdist for review round one`).
+The single finding is accepted.
+
+| Item | Finding | Correction and verification |
+| --- | --- | --- |
+| 14, 8 | R1-01 | The sdist omitted `scripts/e2e_sub_help.py`, yet shipped `tests/test_cli_sub_help.py`, which loads it at import, and `scripts/e2e_wheel.py`, which imports it. Pytest in the unpacked archive stopped with two collection errors. The helper is now in the sdist include list. |
+
+The round 9 report wrongly stated that the helper was included. A new contract,
+`tests/test_sdist_include.py`, reads the sdist include list from `pyproject.toml`
+and scans every shipped test and script for scripts they load by path or import; each
+one must be listed. It failed against the reviewed head, naming both references to the
+missing helper, and passes after the fix. CHANGELOG records the packaging correction.
+Runtime code and the public API are unchanged.
+
+The rebuilt sdist was unpacked in a clean folder and its own suite exits 0: 465 passed
+and 25 skipped. The skips are the fetched pages, which by design are not shipped, and
+the opt-in wheel e2e. The sdist now lists seven helper scripts and its SHA-256 is
+`a9fbaad1bc9d6e7382b94fbd106d09cc852246617d14ebd04df9979401438825`; the wheel built
+alongside it has SHA-256
+`a50dc3c36def658a4d32d847cb881c2bd637c20efd93e367fb062393007c33e6`.
+
+`ruff format --check .`, `ruff check .`, `mypy --strict src` and
+`mypy --strict src tests` each exit 0. The full suite with the wheel e2e enabled passes
+488 tests on CPython 3.13.2; its two skips are the reference-package oracles, absent
+from that interpreter, and those three tests pass with the packages installed.
+
+Evidence is retained under `scratch/hexrgba-cert/fix-review-r1/`: `red.log`,
+`sdist-suite.log`, `gates.log`, `full.log` and `oracles.log`. No findings are disputed.
+
 ## Remaining stages
 
-Preparation checks and the round 1 to 9 fixes are complete. The independent review and
-five-lens re-verification remain pending. Merge and publication remain pending.
+Preparation checks, the round 1 to 9 fixes and the review round 1 fix are complete.
+Independent re-verification and the five-lens re-verification remain pending. Merge and publication remain pending.
