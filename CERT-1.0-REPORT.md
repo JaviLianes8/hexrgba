@@ -541,8 +541,8 @@ missing helper, and passes after the fix. CHANGELOG records the packaging correc
 Runtime code and the public API are unchanged.
 
 The rebuilt sdist was unpacked in a clean folder and its own suite exits 0: 465 passed
-and 25 skipped. The skips are the fetched pages, which by design are not shipped, and
-the opt-in wheel e2e. The sdist now lists seven helper scripts and its SHA-256 is
+and 25 skipped. The skips are the fetched pages, which by design are not shipped, the
+opt-in wheel e2e and the two reference-package oracles absent from that interpreter. The sdist now lists seven helper scripts and its SHA-256 is
 `a9fbaad1bc9d6e7382b94fbd106d09cc852246617d14ebd04df9979401438825`; the wheel built
 alongside it has SHA-256
 `a50dc3c36def658a4d32d847cb881c2bd637c20efd93e367fb062393007c33e6`.
