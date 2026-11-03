@@ -474,7 +474,54 @@ Evidence is retained under `scratch/hexrgba-cert/fix-r8/`: `red.log`, `full.log`
 `mutation-results.json`, and each mutation's `Nxx-before.log`, `Nxx-source.log`,
 `Nxx-build.log`, `Nxx-console.json` and `Nxx-module.json`. No findings are disputed.
 
+## QA round 9: findings and fixes
+
+Date: 2026-11-03. Reviewed head: `03b2011b67166b1e4bd40f4c3c68a8cbdf537c07`.
+Fix commit: `04759bb2ddea57d1876bb9d4dbf448f89d383d7c`
+(`enforce help example and complete subcommand help contracts for round nine`).
+All seven findings are accepted. Independent re-verification remains pending.
+
+| Lens | Finding | Correction and verification |
+| --- | --- | --- |
+| e | E-R9-01 | Every root example line is pinned in full. A failing `--level` example must state the threshold that WCAG assigns to its level and text size, its ratio must lie below it, and the command must print that ratio, exit 1 and report the failed level. A passing 4.54 AA pair bounds the applied threshold from above. |
+| e | E-R9-02 | The complete contrast help is pinned, and `background` is tied to `contrast black "#ffffff80"`, which exits 2 with "background must be opaque". |
+| e | E-R9-03 | `foreground` is tied to `contrast "#00000080" white`, which prints `4.00:1` and exits 0. |
+| e | E-R9-04 | The exit code stated by `--level` is read from the help and must equal the observed exit 1 of `contrast white white --level AA`. |
+| e | E-R9-05 | `--large` must say it applies with `--level`; `--large` alone is a usage error (exit 2), and with `--level AA` it lets the 4.47 pair pass. |
+| e | E-R9-06 | The complete normalized text of every subcommand help is pinned, so an added description fails; `normalize "#AABBCC"` must print lower-case `#aabbcc`. |
+| e | E-R9-07 | The same complete-text assertion covers epilogs: no subcommand has one, and `blend` succeeds with exit 0. |
+
+These findings concern missing contracts for correctly implemented behavior. Runtime
+code, public API and help text remain unchanged. The new checker
+`scripts/e2e_sub_help.py` and the extended `scripts/e2e_root_help.py` run in source
+tests and, through `scripts/e2e_wheel.py`, against the installed console script and
+`python -m hexrgba`. Seven new regression cases replay each false help text and require
+the checker to reject it; the example-threshold case first failed against the original
+checker, and the subcommand cases could not run before the checker existed.
+
+Each exact reviewer patch was applied alone to a scratch copy of the fixed tree and the
+four CLI test files were run against it:
+
+| Mutation | Source test detecting it |
+| --- | --- |
+| P01: example states `below 3:1` | `test_root_help_matches_behavior[examples]` |
+| P02: background may be translucent | `test_subcommand_help_matches_behavior[contrast]` |
+| P03: foreground must be opaque | `test_subcommand_help_matches_behavior[contrast]` |
+| P04: `--level` promises exit 2 | `test_subcommand_help_matches_behavior[contrast]` |
+| P05: `--large` implies `--level AA` | `test_subcommand_help_matches_behavior[contrast]` |
+| P08: upper-case normalize description | `test_subcommand_help_matches_behavior[normalize]` |
+| P09: blend epilog with success code 3 | `test_subcommand_help_matches_behavior[blend]` |
+
+`ruff format --check .`, `ruff check .`, `mypy --strict src` and
+`mypy --strict src tests` each exit 0. The full suite passes **488 tests, no skips**,
+including doctests, fetched specifications, live reference packages, wheel/CLI e2e and
+upgrade from PyPI 0.2.1. Every test has a 300-second timeout. This round ran on
+CPython 3.14.2; the preparation interpreter matrix above is historical.
+
+Evidence is retained under `scratch/hexrgba-cert/fix-r9/`: `red.log`, `full.log` and
+each mutation's `Pxx-source.log`. No findings are disputed.
+
 ## Remaining stages
 
-Preparation checks and the round 1, 2, 3, 4, 5, 6, 7 and 8 fixes are complete. The independent review and
+Preparation checks and the round 1 to 9 fixes are complete. The independent review and
 five-lens re-verification remain pending. Merge and publication remain pending.
