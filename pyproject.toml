@@ -53,6 +53,7 @@ include = [
     "scripts/e2e_output.py",
     "scripts/e2e_help.py",
     "scripts/e2e_root_help.py",
+    "scripts/e2e_sub_help.py",
     "scripts/upgrade_probe.py",
     "CHANGELOG.md",
     "GUIDE.md",

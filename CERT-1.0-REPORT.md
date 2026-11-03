@@ -85,7 +85,8 @@ across the API (22 outputs per pair), plus eight explicit changed behaviors agai
 the installed 0.2.1 release. All stable results match and all eight changes are confirmed.
 Both distributions pass `twine check --strict`. The wheel contains only the package,
 typing marker and distribution metadata including LICENSE. The sdist contains source,
-tests, the derived color table, manifest, three test utilities, README, GUIDE, CHANGELOG,
+tests, the derived color table, manifest, seven helper scripts (upstream fetcher, wheel
+e2e, upgrade probe and four CLI checkers), README, GUIDE, CHANGELOG,
 LICENSE and pyproject; no fetched pages, caches or scratch files.
 
 Seeded tests cover 3,000 random RGBA values and 9,000 hostile strings; additional
@@ -150,7 +151,7 @@ The package files in the final wheel are byte-identical to the initial matrix wh
 Initial launcher/dependency setup failures were corrected before these passing runs.
 
 Final wheel SHA-256: `88288bbba6982a07ff6363373c01358eb0d73d04a27a7079b45b820bc78529e0`.
-Final sdist SHA-256: `5222b7ca7976f1ad327f5c26d042ed7735c5f1e41835d870a5770a734d032372`.
+Final sdist SHA-256: `a9fbaad1bc9d6e7382b94fbd106d09cc852246617d14ebd04df9979401438825`.
 
 ## QA round 1: findings and fixes
 

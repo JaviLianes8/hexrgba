@@ -74,6 +74,8 @@ All notable changes to this project are documented here. The format follows
   is pinned; contrast operand roles, the `--level` failure exit code and the
   `--large` dependency on `--level` match translucent, failing and rejected
   invocations through source and both installed entry points.
+- The sdist ships every helper script that its tests and wheel check load, so the
+  suite runs from the unpacked archive.
 
 ## [0.2.1] - 2026-10-13
 
