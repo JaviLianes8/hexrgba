@@ -1,11 +1,12 @@
 # hexrgba guide
 
 This guide states the exact rules `hexrgba` follows and where each one comes from. All
-sources were fetched on 2026-10-12.
+sources were fetched again on 2026-11-01; the pinned URLs and hashes are recorded in
+[the manifest](https://github.com/JaviLianes8/hexrgba/blob/main/tests/upstream/MANIFEST.json).
 
 | Topic | Source |
 | --- | --- |
-| Hex syntax, named colors, `transparent`, serialization | [CSS Color Module Level 4](https://www.w3.org/TR/css-color-4/), Candidate Recommendation Draft of 9 October 2026, sections 5.2, 6.1, 6.3 and 16 |
+| Hex syntax, named colors, `transparent`, serialization | [CSS Color Module Level 4](https://www.w3.org/TR/2026/CRD-css-color-4-20261022/), Candidate Recommendation Draft of 22 October 2026, sections 5.2, 6.1, 6.3 and 16 |
 | Golden parsing vectors | [Web Platform Tests `css/css-color/parsing`](https://github.com/web-platform-tests/wpt/tree/786385c76ca1c01d40eba0234dc59384e2eb73d4/css/css-color/parsing), commit `786385c` |
 | Luminance and contrast | [WCAG 2.2](https://www.w3.org/TR/WCAG22/), Recommendation of 12 December 2024 |
 | Blending | [Compositing and Blending Level 1](https://www.w3.org/TR/compositing-1/), section 5.1 |
@@ -36,13 +37,13 @@ hash-less hex color; a test pins that.
 are not accepted as input: they need a cascade or a much larger grammar.
 
 The `0.1.0` functions (`is_hex`, `parse`, `normalize`, `to_hex`) keep their exact
-behaviour: hex only, lenient, `(r, g, b, a)` tuples.
+valid-input behaviour: hex only, lenient, `(r, g, b, a)` tuples.
 
 ## Output
 
 - `Color.hex` and `normalize()` give canonical lower-case `#rrggbb` when opaque and
   `#rrggbbaa` otherwise.
-- `to_hex(short=True)`, `normalize(..., short=True)` and `shorten()` give `#rgb` or `#rgba`
+- `Color.to_hex(short=True)`, `normalize(..., short=True)` and `shorten()` give `#rgb` or `#rgba`
   only when that is lossless (`#aabbcc` to `#abc`, `#aabbcd` stays long).
 - `Color.to_css()` follows "CSS serialization of sRGB values" (section 16.2.2): `rgb(r, g, b)`
   when the alpha byte is 255, else `rgba(r, g, b, alpha)`, comma separated with one space.
@@ -68,8 +69,11 @@ one way back:
 **Round-trip contract**, tested for all 256 bytes:
 
 ```python
-alpha_to_byte(a / 255) == a
-alpha_to_byte(float(css_alpha(a))) == a
+from hexrgba import alpha_to_byte, css_alpha
+
+for a in range(256):
+    assert alpha_to_byte(a / 255) == a
+    assert alpha_to_byte(float(css_alpha(a))) == a
 ```
 
 So `#rrggbbaa` to `Color.alpha` (or to the `rgba()` string) and back to hex is lossless.
@@ -87,9 +91,15 @@ channels, using the `0.04045` threshold of the current WCAG definition (older te
 ignored.
 
 `contrast_ratio(fg, bg)` is `(L1 + 0.05) / (L2 + 0.05)` with `L1` the lighter, from 1 to 21.
-A translucent foreground is first blended over the background and rounded to 8-bit
-channels, as a browser paints it; the ratio is measured on that painted color. The background must be
-opaque, because what lies behind it is unknown.
+A translucent foreground uses ideal source-over arithmetic, rounded once to 8-bit
+channels before measuring the ratio. The background must be opaque, because what lies
+behind it is unknown. Browser rendering pipelines can produce different pixels and
+pass/fail decisions near a threshold. Supply measured opaque colors when assessing
+actual rendering.
+
+For example, `#9212a4ce` over `#1dedb3` gives an ideal composite of `#7c3ca7` and a
+ratio of about 4.513298, passing AA. If a renderer instead produces `#7c3da6`, its
+ratio is about 4.493067, failing AA. The library does not promise browser pixel equality.
 
 `passes_contrast(fg, bg, level="AA", large=False)` compares without rounding, as WCAG
 requires (4.499 fails 4.5):
@@ -113,11 +123,13 @@ Co = (Cs as + Cb ab (1 - as)) / ao
 ```
 
 It is computed with exact fractions and each channel is rounded to a byte once, halves
-up. If both inputs are fully transparent the result is transparent black.
+up. The result is a new base `Color`, including when an input is a subclass. An
+opaque foreground produces its own RGBA channels; a transparent foreground produces
+the background channels. If both inputs are fully transparent the result is transparent black.
 
 ## Errors
 
-All errors are `ValueError` subclasses, so `0.1.0` handlers keep working:
+Color value errors are `ValueError` subclasses:
 
 - `ColorError`: base class; also raised for a translucent contrast background.
 - `HexColorError`: malformed hex, or a hash-less hex in strict mode.
@@ -125,9 +137,29 @@ All errors are `ValueError` subclasses, so `0.1.0` handlers keep working:
   wrong type, including booleans.
 - `ColorNameError`: neither hex nor a known keyword.
 
-`parse_color` raises `TypeError` for a non-string. `is_color` never raises.
-`is_hex` and `parse` keep their 0.1.0 behaviour and raise `AttributeError` for a non-string.
-Error messages show at most the first 40 characters of the offending value.
+`parse`, `parse_color`, `normalize`, `shorten`, and `Color.parse` raise `TypeError`
+for non-string input. `is_color` and `is_hex` return `False` for non-strings.
+`passes_contrast` raises `TypeError` for a non-string level or non-boolean `large`,
+and `ValueError` for a level other than AA or AAA (case-insensitive).
+Messages describe expected types, ranges and syntax without including input values or
+custom type names. Rejection does not call object representations or traverse container
+contents. This replaces the former 40-character representation preview, which could
+expose secrets even when truncated. CLI usage errors also omit argument contents;
+use the command's `--help` for syntax and allowed choices.
+
+## Upgrading from 0.2.1
+
+The 19 exported names, parameter names, defaults and valid-input results remain stable.
+Wrong text argument types now give `TypeError` instead of accidental `AttributeError`;
+`is_hex` returns `False`. Numeric and string subclasses are read as their underlying
+built-in values. `Color` stores plain integer channels. Bad `level` and `large` types
+are rejected explicitly. Type checks use actual types without consulting instance `__class__` hooks.
+Invalid values give bounded diagnostics without rendering their contents.
+Public classes now pickle under `hexrgba`; existing 0.2.1 pickles still load.
+`Color.parse` and `with_alpha` preserve subclasses. Predicates accept `object` in typing.
+The CLI omits input values from errors and exits 1 quietly if its output closes early,
+including during `--help` and `--version`.
+See the CHANGELOG for the complete list.
 
 ## Command line
 

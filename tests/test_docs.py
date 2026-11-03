@@ -33,3 +33,11 @@ def test_readme_contrast_example_is_accurate() -> None:
     namespace: dict[str, object] = {}
     exec("from hexrgba import contrast_ratio", namespace)
     assert str(eval('contrast_ratio("#767676", "white")', namespace)).startswith("4.54")
+
+
+def test_guide_python_examples_run() -> None:
+    guide = (Path(__file__).parent.parent / "GUIDE.md").read_text("utf-8")
+    blocks = guide.split("```python\n")[1:]
+    assert blocks
+    for block in blocks:
+        exec(block.split("```", 1)[0], {})

@@ -6,6 +6,77 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-01
+
+### Stable
+
+- The 19-name public API: hex and CSS named colors, immutable `Color`, exact byte
+  alpha conversions, CSS serialization, WCAG contrast, blending and typed value errors.
+- Python 3.10 through 3.14, zero runtime dependencies, and the four CLI commands.
+
+### Changed
+
+- `is_hex` returns `False` for non-strings. Text parsers (`parse`, `parse_color`,
+  `normalize`, `shorten`, `Color.parse`, and color-taking helpers) raise `TypeError`
+  for wrong argument types rather than accidental `AttributeError`.
+- String and numeric subclasses are read through their underlying built-in values;
+  `Color` stores plain `int` channels. Their overridden conversion, comparison or
+  formatting methods no longer change results.
+- `passes_contrast` rejects a non-string `level` and non-boolean `large` with
+  `TypeError`; unknown string levels still raise `ValueError`.
+- Error messages describe expected types, ranges and syntax without echoing input
+  values or custom type names. This replaces truncated representation previews and
+  integer bit lengths. Rejection never calls `repr` or traverses container contents.
+- Type validation uses actual types without calling instance `__class__` hooks;
+  genuine numeric and string subclasses retain their underlying built-in behavior.
+- `Color` and the error classes identify and pickle as public `hexrgba` names;
+  pickles written by 0.2.1 remain readable.
+- `Color.parse` and `with_alpha` preserve a `Color` subclass instead of returning
+  the base `Color`. Predicates are typed to accept `object` to match their runtime use.
+- CLI usage errors omit argument contents and point to `--help` for syntax and choices.
+  A closed output exits 1 without a traceback, including `--help` and `--version`.
+- Unbuffered help and version output also exits 1 quietly on a closed pipe, including
+  every subcommand's help through the module and installed console entry points.
+
+### Clarified
+
+- `blend` returns a new base `Color` with the composited RGBA channels; it does not
+  reuse operands or preserve their subclasses.
+- Translucent contrast uses ideal source-over arithmetic rounded once to bytes.
+  Browser rendering may differ, including AA/AAA decisions near thresholds.
+
+### Verified
+
+- Runnable public examples, strict typing, specification and reference checks,
+  seeded fuzz, wheel/CLI installation and upgrade, and mutation-tested contracts.
+- Exact explicit opaque-alpha formatting, strict parsing through `Color` subclasses,
+  alpha-independent luminance, and diagnostics at the former preview boundaries.
+- Fresh base `Color` results for opaque and transparent blends, underlying string
+  values despite `__str__` overrides, and private strict-hex and unnamed-color errors.
+- Root and subcommand help syntax, required operands, flags and supported choices,
+  including successful output through both installed entry points with empty stderr.
+- Help's CSS conversion default, foreground/background blend roles and option arity
+  agree with executable examples through source and both installed entry points.
+- Help's lossless shortening, strict CSS syntax and named-color support agree with
+  accepted and rejected inputs through source and both installed entry points.
+- Root help's hex and named-color capabilities match executable input examples
+  through source and both installed entry points.
+- Complete root help descriptions, command summaries and version-option wording
+  match lowercase normalization, default CSS conversion, ratio output, compositing
+  order, named-color support and package-version output through source
+  and both installed entry points.
+- Complete root usage requires a command and no extra operands; the exit-code
+  summary matches successful commands, failed contrast levels and invalid input
+  through source and both installed entry points.
+- Every root help example's complete result, including the threshold stated for a
+  failing contrast level, matches command output and the WCAG threshold applied.
+- The complete help text of every subcommand, including any description and epilog,
+  is pinned; contrast operand roles, the `--level` failure exit code and the
+  `--large` dependency on `--level` match translucent, failing and rejected
+  invocations through source and both installed entry points.
+- The sdist ships every helper script that its tests and wheel check load, so the
+  suite runs from the unpacked archive.
+
 ## [0.2.1] - 2026-10-13
 
 ### Changed

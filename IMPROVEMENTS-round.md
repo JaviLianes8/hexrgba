@@ -9,6 +9,12 @@ Progress:
 - [x] 5. Contracts, spec and WPT vectors, WCAG examples, seeded fuzz, real wheel e2e
 - [x] 6. Pull request opened (#2)
 - [x] 7. Independent review findings fixed, gates re-run, pushed
+- [x] 8. 1.0.0 QA round 1 findings corrected and regression contracts verified
+- [x] 9. 1.0.0 QA round 2 findings corrected and regression contracts verified
+- [x] 10. 1.0.0 QA round 3 help contracts verified against source and installed entry points
+- [x] 11. 1.0.0 QA round 7 complete root help contracts verified against all six reported mutations
+- [x] 12. 1.0.0 QA round 8 root usage and exit-code contracts cover all three reported mutations
+- [x] 13. 1.0.0 QA round 9 example and complete subcommand help contracts cover all seven reported mutations
 
 Ranked, substantial improvements for `hexrgba`, measured against the `0.1.0` surface:
 `is_hex`, `parse`, `normalize`, `to_hex` and `HexColorError`. Every item is additive:

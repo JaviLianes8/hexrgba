@@ -3,15 +3,21 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
+import io
 import math
 import sys
 from collections.abc import Sequence
+from typing import TYPE_CHECKING, NoReturn
 
 from . import __version__
 from ._blend import blend
 from ._color import Color, parse_color
 from ._errors import ColorError
 from ._wcag import contrast_ratio, passes_contrast
+
+if TYPE_CHECKING:
+    from _typeshed import SupportsWrite
 
 _EXAMPLES = """exit codes: 0 success, 1 the pair fails --level, 2 bad usage or invalid color
 
@@ -31,13 +37,27 @@ examples (quote a leading # so the shell does not read it as a comment):
 _FORMATS = ("hex", "short", "css", "channels", "name")
 
 
-# Exit codes: 0 success, 1 the pair fails --level, 2 bad usage or an invalid color.
+# Exit codes: 0 success, 1 the pair fails --level (or the output closed early), 2 bad usage
+# or an invalid color.
 EXIT_FAILS_LEVEL = 1
 EXIT_BAD_INPUT = 2
+EXIT_OUTPUT_CLOSED = 1
+
+
+class _Parser(argparse.ArgumentParser):
+    """An argument parser whose usage errors never include argument contents."""
+
+    def error(self, message: str) -> NoReturn:
+        super().error("invalid command or arguments; use --help for syntax and choices")
+
+    def _print_message(self, message: str, file: SupportsWrite[str] | None = None) -> None:
+        # argparse suppresses write errors; main must handle them even without buffering.
+        if message:
+            (file if file is not None else sys.stderr).write(message)
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _Parser(
         prog="hexrgba",
         description="Normalize, convert, compare and blend CSS hex and named colors.",
         epilog=_EXAMPLES,
@@ -83,7 +103,7 @@ def _convert(color: Color, target: str) -> str:
         return " ".join(str(channel) for channel in color.as_tuple())
     if target == "name":
         if color.name is None:
-            raise ColorError(f"no CSS named color equals {color.hex}")
+            raise ColorError("no CSS named color equals the supplied color")
         return color.name
     return color.to_css()
 
@@ -115,11 +135,27 @@ def _run(args: argparse.Namespace) -> int:
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the command-line interface and return a process exit code."""
     parser = _build_parser()
-    args = parser.parse_args(argv)
-    if args.command == "contrast" and args.large and not args.level:
-        parser.error("--large only applies together with --level")
     try:
-        return _run(args)
+        try:
+            args = parser.parse_args(argv)
+            if args.command == "contrast" and args.large and not args.level:
+                parser.error("--large only applies together with --level")
+            code = _run(args)
+        finally:
+            # Help and version exit inside argparse, before normal command execution.
+            sys.stdout.flush()
     except (ColorError, TypeError) as exc:
         print(f"hexrgba: error: {exc}", file=sys.stderr)
         return EXIT_BAD_INPUT
+    except OSError:
+        # Only printing can fail here: the reader went away (a closed pipe, which Windows
+        # reports as EINVAL). Exit 1 quietly instead of a traceback at the final flush.
+        _silence_stdout()
+        return EXIT_OUTPUT_CLOSED
+    return code
+
+
+def _silence_stdout() -> None:
+    with contextlib.suppress(OSError, ValueError):
+        sys.stdout.close()
+    sys.stdout = io.StringIO()

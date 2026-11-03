@@ -3,6 +3,10 @@
 Copied programmatically from the table in section 6.1 of CSS Color Module Level 4,
 https://www.w3.org/TR/css-color-4/#named-colors (Candidate Recommendation Draft of
 9 October 2026, fetched 2026-10-12). Rows keep the spec order, which is alphabetical.
+
+>>> from hexrgba import NAMED_COLORS
+>>> NAMED_COLORS["aliceblue"], NAMED_COLORS["yellowgreen"], "transparent" in NAMED_COLORS
+('#f0f8ff', '#9acd32', False)
 """
 
 from __future__ import annotations

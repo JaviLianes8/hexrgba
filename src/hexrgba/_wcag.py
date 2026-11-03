@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from ._blend import blend, to_color
 from ._color import Color
-from ._errors import ColorError
+from ._errors import ColorError, text_argument
 
 # (level, large text) -> minimum ratio. Compared without rounding, as WCAG requires.
 _THRESHOLDS = {("AA", False): 4.5, ("AA", True): 3.0, ("AAA", False): 7.0, ("AAA", True): 4.5}
@@ -28,6 +28,11 @@ def relative_luminance(color: Color | str) -> float:
     ``L = 0.2126 * R + 0.7152 * G + 0.0722 * B`` on linearized sRGB channels, with the
     0.04045 threshold of the current definition. Alpha is ignored: composite a
     translucent color first with :func:`blend`.
+
+    >>> relative_luminance("black"), relative_luminance("white")
+    (0.0, 1.0)
+    >>> round(relative_luminance("#767676"), 4)
+    0.1812
     """
     c = to_color(color)
     return 0.2126 * _linear(c.r) + 0.7152 * _linear(c.g) + 0.0722 * _linear(c.b)
@@ -38,13 +43,20 @@ def contrast_ratio(foreground: Color | str, background: Color | str) -> float:
 
     L1 is the lighter luminance, so the order of two opaque colors does not matter. A
     translucent foreground is first composited over the background with :func:`blend`
-    and rounded to 8-bit channels, as a browser paints it.
+    using ideal source-over arithmetic rounded once to 8-bit channels. Browser
+    rendering can differ, including pass/fail decisions near contrast thresholds.
+    Supply measured opaque colors to assess actual rendered pixels.
     The background must be opaque, since what lies behind it is unknown: a translucent
     background raises ColorError.
+
+    >>> contrast_ratio("black", "white")
+    21.0
+    >>> round(contrast_ratio("#767676", "white"), 2)
+    4.54
     """
     bg = to_color(background)
     if not bg.is_opaque:
-        raise ColorError(f"background must be opaque to measure contrast, got {bg.hex}")
+        raise ColorError("background must be opaque to measure contrast")
     fg = blend(foreground, bg)
     first, second = relative_luminance(fg), relative_luminance(bg)
     lighter, darker = max(first, second), min(first, second)
@@ -62,9 +74,18 @@ def passes_contrast(
 
     The minimum ratios are 4.5 (AA), 3 (AA, large text), 7 (AAA) and 4.5 (AAA, large
     text). ``level`` is case-insensitive. The ratio is not rounded first, so 4.499 fails
-    4.5. Raises ValueError for an unknown level.
+    4.5. Raises ValueError for an unknown level and TypeError when ``level`` is not a str
+    or ``large`` is not a bool.
+
+    >>> passes_contrast("#767676", "white"), passes_contrast("#777777", "white")
+    (True, False)
+    >>> passes_contrast("#777777", "white", large=True)
+    True
     """
-    key = (level.upper() if isinstance(level, str) else level, large)
+    level = text_argument(level, "level")
+    if type(large) is not bool:
+        raise TypeError("large must be a bool")
+    key = (str.upper(level), large)
     if key not in _THRESHOLDS:
-        raise ValueError(f"level must be 'AA' or 'AAA', (any case), got {level!r}")
+        raise ValueError("level must be 'AA' or 'AAA' in any case")
     return contrast_ratio(foreground, background) >= _THRESHOLDS[key]
