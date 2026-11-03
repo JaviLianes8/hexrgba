@@ -11,8 +11,8 @@ Progress:
 - [x] Available interpreter matrix (10)
 - [x] Four gates (15), plus strict types for tests
 - [x] Mutation round (18)
-- [ ] Independent reviewer (16)
-- [ ] Five QA lenses (19)
+- [x] Independent reviewer (16)
+- [x] Five QA lenses (19)
 - [x] PR handoff: [#4](https://github.com/JaviLianes8/hexrgba/pull/4); merge and publication remain pending
 
 ## API and compatibility
@@ -43,10 +43,10 @@ An external consumer of the installed wheel also passes `mypy --strict`.
 | 13 | PASS | Production/Stable, 1.0.0, accurate Python floor/classifiers and project URLs |
 | 14 | PASS | Wheel and sdist contents inspected, LICENSE present, no downloaded text |
 | 15 | PASS | Four gates exit 0 independently; full suite 353 passed |
-| 16 | Pending | Independent reviewer has not run |
+| 16 | PASS | Independent review round 2 at `84f7355`; scorecard below |
 | 17 | Ready | PR #4 from release/1.0.0 to main; merge and publication pending |
 | 18 | PASS | Fifteen deliberate bugs killed; table below |
-| 19 | Pending | Round 5: E-R5-01, E-R5-02 and E-R5-03 help contracts fixed below; independent re-verification remains pending |
+| 19 | PASS | All five lenses report PASS; QA table below |
 
 ## Ground truth
 
@@ -150,8 +150,9 @@ found the twelve distinct builds above. No supported minor version was unavailab
 The package files in the final wheel are byte-identical to the initial matrix wheel.
 Initial launcher/dependency setup failures were corrected before these passing runs.
 
-Final wheel SHA-256: `88288bbba6982a07ff6363373c01358eb0d73d04a27a7079b45b820bc78529e0`.
-Final sdist SHA-256: `a9fbaad1bc9d6e7382b94fbd106d09cc852246617d14ebd04df9979401438825`.
+Matrix wheel SHA-256 (historical, preparation stage):
+`88288bbba6982a07ff6363373c01358eb0d73d04a27a7079b45b820bc78529e0`. The current
+release artifacts are listed under "Release artifacts" below.
 
 ## QA round 1: findings and fixes
 
@@ -540,6 +541,10 @@ one must be listed. It failed against the reviewed head, naming both references 
 missing helper, and passes after the fix. CHANGELOG records the packaging correction.
 Runtime code and the public API are unchanged.
 
+The sdist and wheel hashes quoted in the next paragraph came from a build whose
+LICENSE had CRLF line endings, so they cannot be reproduced from a checkout. They are
+superseded by the clean-clone hashes under "Release artifacts".
+
 The rebuilt sdist was unpacked in a clean folder and its own suite exits 0: 465 passed
 and 25 skipped. The skips are the fetched pages, which by design are not shipped, the
 opt-in wheel e2e and the two reference-package oracles absent from that interpreter. The sdist now lists seven helper scripts and its SHA-256 is
@@ -555,7 +560,61 @@ from that interpreter, and those three tests pass with the packages installed.
 Evidence is retained under `scratch/hexrgba-cert/fix-review-r1/`: `red.log`,
 `sdist-suite.log`, `gates.log`, `full.log` and `oracles.log`. No findings are disputed.
 
+## Independent review
+
+Round 1 at `c93f357` failed item 14 (R1-01, fixed in `bf549eb`, see above). Round 2
+at `84f7355` passed every item. Report: independent review round 2, kept in the
+certification scratch folder (`scratch/hexrgba-cert/review-r2/REPORT.md`).
+
+| Item | Result |
+| --- | --- |
+| 1 | PASS |
+| 2 | PASS |
+| 3 | PASS |
+| 4 | PASS |
+| 5 | PASS |
+| 6 | PASS |
+| 7 | PASS |
+| 8 | PASS |
+| 9 | PASS |
+| 10 | PASS |
+| 11 | PASS |
+| 12 | PASS |
+| 13 | PASS |
+| 14 | PASS |
+| 15 | PASS |
+| 16 | PASS |
+| 18 | PASS |
+| 19 | PASS |
+
+Item 17 (merge and publication) is outside the review by definition.
+
+## QA lenses (item 19)
+
+| Lens | Rounds | Final verdict | Report location | Commit |
+| --- | --- | --- | --- | --- |
+| a. API and docs | 2 | PASS | Laptop run, lens a round 2 report (`scratch/hexrgba-cert/lens-a-r2/REPORT.md`) | `3080a6f` |
+| b. Correctness and ground truth | 2 | PASS | Laptop run, lens b round 2 report (`scratch/hexrgba-cert/lens-b-r2/REPORT.md`) | `3080a6f` |
+| c. Adversarial and robustness | 2 | PASS | Laptop run, lens c round 2 report (`scratch/hexrgba-cert/lens-c-r2/REPORT.md`) | `3080a6f` |
+| d. Packaging and real e2e | 3 | PASS | Laptop run, lens d round 3 report (`scratch/hexrgba-cert/lens-d-r3/REPORT.md`) | `94a0dde` |
+| e. Contract strength | 10 | PASS | Workstation run, lens e round 10 report (`scratch/hexrgba-cert/lens-e-r10/REPORT.md`) | `c93f357` |
+
+Every finding from every lens was fixed and re-verified by the same lens.
+
+## Release artifacts
+
+Built with `python -m build` from a fresh clone of `release/1.0.0` at `84f7355`
+(LICENSE checked out with LF line endings, as committed). `twine check --strict`
+passes for both. These replace the earlier hashes, which came from a build with a
+CRLF LICENSE and are not reproducible from a checkout. Later commits change only this
+report, which is not shipped in either archive.
+
+- Wheel `hexrgba-1.0.0-py3-none-any.whl` SHA-256:
+  `b90d36f33d11b3114547381065cf4f7a750984c0137452db62a247e0e4d76d91`
+- Sdist `hexrgba-1.0.0.tar.gz` SHA-256:
+  `ec46c690091dbfaef5c16655e06e1b30850ca069c3a5a2ccf3156ee1435bce9e`
+
 ## Remaining stages
 
-Preparation checks, the round 1 to 9 fixes and the review round 1 fix are complete.
-Independent re-verification and the five-lens re-verification remain pending. Merge and publication remain pending.
+Preparation, all QA rounds, both review rounds and the final gates are complete; all
+certification items pass. Merge and publication remain pending.
